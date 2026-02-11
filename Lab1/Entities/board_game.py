@@ -1,22 +1,25 @@
-from typing import Protocol, runtime_checkable, TYPE_CHECKING
+from __future__ import annotations
+from typing import Any, Protocol, runtime_checkable, TYPE_CHECKING
 from dataclasses import dataclass, field
 
-from Entities.player import MonopolyPlayer
+from Entities.player import IPlayer, MonopolyPlayer
 from Entities.game_components import IGameComponent, Dice, Chip, Card
 
+if TYPE_CHECKING:
+    from Entities.player import MafiaPlayer
 
 @runtime_checkable
 class IBoardGame(Protocol):
 
     max_players: int
     min_players: int
-    players_list: list[MonopolyPlayer]
+    players_list: list["IPlayer" | Any]
     items_list: list[IGameComponent]
 
     def validate_items(self, component) -> bool: ...
 
-    def add_player(self, new_player: MonopolyPlayer) -> None:
-        if not isinstance(new_player, MonopolyPlayer):
+    def add_player(self, new_player: IPlayer) -> None:
+        if not isinstance(new_player, IPlayer):
             raise TypeError("Wrong obj, must be a player")
         
         if len(self.players_list) >= self.max_players:
@@ -30,7 +33,7 @@ class IBoardGame(Protocol):
 class GameContext:
     min_players: int
     max_players: int
-    players: list["MonopolyPlayer"] = field(default_factory=list)  # forward ref to avoid import
+    players: Any["IPlayer"] = field(default_factory=list)  # forward ref to avoid import
     items: list["IGameComponent"] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -45,16 +48,16 @@ class MonopolyBoard(IBoardGame):
             if game_context.min_players < 1:
                 raise ValueError("min_players must be >= 1")
 
-            self.max_players = game_context.max_players
-            self.min_players = game_context.min_players
-            self.players_list = game_context.players
+            self.max_players: int = game_context.max_players
+            self.min_players: int = game_context.min_players
+            self.players_list: list["MonopolyPlayer"] = game_context.players
             self.items_list = game_context.items
         else:
             self.max_players = 4
             self.min_players = 2
-            self.players_list = []
+            self.players_list: list["MonopolyPlayer"] = []
             self.items_list = []
-        self.owned_properties: dict[MonopolyPlayer, list[int]] = {}
+        self.owned_properties: dict["MonopolyPlayer", list[int]] = {}
 
     def validate_items(self, component) -> bool:
         valid_components = (Dice, Chip)
@@ -83,14 +86,15 @@ class MafiaBoard(IBoardGame):
 
             self.max_players = game_context.max_players
             self.min_players = game_context.min_players
-            self.players_list = game_context.players
+            self.players_list: list["MafiaPlayer"] = game_context.players
             self.items_list = game_context.items
         else:
             self.max_players = 4
             self.min_players = 3
-            self.players_list = []
+            self.players_list: list["MafiaPlayer"] = []
             self.items_list = []
-        
+        self.day_votes: dict[str, int] = {}
+        self.night_votes: dict[str, int] = {}
 
     def validate_items(self, component) -> bool:
         if not isinstance(component, Card):

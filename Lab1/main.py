@@ -1,4 +1,4 @@
-def main() -> None:
+def monopoly_sample() -> None:
     from Entities.game_components import Dice, Chip, Card
 
     from Entities.board_game import GameContext, MonopolyBoard
@@ -34,5 +34,37 @@ def main() -> None:
                 print(f"{player.name}{', '.join(actions)}")
         print("Game over!")
 
+def mafia_sample() -> None:
+    from Entities.game_components import Card
+    from Entities.board_game import GameContext, MafiaBoard
+    from Entities.player import MafiaPlayer
+    from GameLogics.mafia import MafiaGameLogic
+    # Create game context
+    game_context = GameContext(
+        min_players=4,
+        max_players=10,
+        players=[
+            MafiaPlayer("Alice", "Smith", Card()),
+            MafiaPlayer("Bob", "Johnson", Card()),
+            MafiaPlayer("Charlie", "Brown", Card()),
+            MafiaPlayer("Diana", "Prince", Card())
+        ],
+        items=[Card()]
+    )
+    # Initialize game
+    mafia_board = MafiaBoard(game_context)
+    game_logic = MafiaGameLogic(mafia_board)
+    # Read rules
+    game_logic.read_rules()
+    # Give roles
+    game_logic.give_roles()
+    # Start game
+    game_starter = game_logic.can_start_game()
+    print(game_starter)
+    if game_starter == "Game can be started.":
+        moves = game_logic.make_moves()
+        for move in moves:
+            print(move)
 if __name__ == "__main__":
-    main()
+    mafia_sample()
+    # monopoly_sample()

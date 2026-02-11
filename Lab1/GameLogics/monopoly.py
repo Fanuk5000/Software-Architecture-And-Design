@@ -11,20 +11,6 @@ class MonopolyGameLogic(IGameLogic):
             raise TypeError("board must be an instance of MonopolyBoard")
         self.board: MonopolyBoard = board
     
-
-    def can_start_game(self) -> str:
-        if len(self.board.players_list) < self.board.min_players:
-            return "Not enough players to start the game."
-
-        for player in self.board.players_list:
-            if not player.knows_rules:
-                return f"Player {player.name} does not know the rules."
-            
-        for item in self.board.items_list:
-            if not self.board.validate_items(item):
-                return f"Invalid game item: {type(item).__name__}."
-        return "Game can be started."
-    
     def check_game_over(self) -> bool:
         bankrupt_amount = 0
         winner = None
@@ -39,7 +25,7 @@ class MonopolyGameLogic(IGameLogic):
             return True
         return False
 
-    def _property_action(self, player: MonopolyPlayer, property_number: int) -> str:
+    def __property_action(self, player: MonopolyPlayer, property_number: int) -> str:
         property_cost = 80
         if player not in self.board.owned_properties:
             self.board.owned_properties[player] = []
@@ -96,6 +82,6 @@ class MonopolyGameLogic(IGameLogic):
                     sleep(1)
             if player.chip.chip_position % 5 == 0:
                 players_actions[player].append("with property did: " + 
-                                self._property_action(
+                                self.__property_action(
                                     player, player.chip.chip_position))
         return players_actions

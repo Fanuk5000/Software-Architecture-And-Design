@@ -9,7 +9,6 @@ class IPlayer(Protocol):
     name: str
     surname: str
     knows_rules: bool
-    chip: "Chip"
 
     def learn_rules(self) -> None:
         self.knows_rules = True
