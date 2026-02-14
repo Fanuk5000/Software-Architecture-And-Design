@@ -1,87 +1,106 @@
 from time import sleep
+from typing import Callable
 
-from GameLogics.abs_logic import IGameLogic
-from Entities.board_game import MonopolyBoard
+from Lab1.GameLogics.logic import GameLogic
+from Entities.monopoly_board import MonopolyBoard
 from Entities.game_components import Dice
 from Entities.player import MonopolyPlayer
 
-class MonopolyGameLogic(IGameLogic):
-    def __init__(self, board: MonopolyBoard) -> None:
+
+class MonopolyLogic(GameLogic):
+    __PROPERTY_COST = 80
+    __RENT = 20
+
+    def __init__(self, board: MonopolyBoard, ui_callback: Callable[[str], None]) -> None:
         if not isinstance(board, MonopolyBoard):
             raise TypeError("board must be an instance of MonopolyBoard")
-        self.board: MonopolyBoard = board
-    
-    def check_game_over(self) -> bool:
+        self._board: MonopolyBoard = board
+        self._ui_callback: Callable[[str], None] = ui_callback
+
+    def is_game_over(self) -> bool:
         bankrupt_amount = 0
         winner = None
-        for player in self.board.players_list:
+        for player in self._board._players_list:
             if player.money <= 0:
                 bankrupt_amount += 1
             else:
                 winner = player
-        if bankrupt_amount >= len(self.board.players_list) - 1:
+        if bankrupt_amount >= len(self._board._players_list) - 1:
             if winner:
-                print(f"The winner is {winner.name}")
+                self._send_to_ui(f"The winner is {winner.name}")
+            return True
+        return False
+
+    def __pay_rent(self, player: MonopolyPlayer, owner: MonopolyPlayer) -> bool:
+        if player.money >= self.__RENT:
+            player.money -= self.__RENT
+            owner.money += self.__RENT
             return True
         return False
 
     def __property_action(self, player: MonopolyPlayer, property_number: int) -> str:
-        property_cost = 80
-        if player not in self.board.owned_properties:
-            self.board.owned_properties[player] = []
-        
-        for owner, properties in self.board.owned_properties.items():
+
+        if player not in self._board.owned_properties:
+            self._board.owned_properties[player] = []
+
+        for owner, properties in self._board.owned_properties.items():
             if property_number in properties and owner != player:
-                rent = 20  # Assuming a fixed rent for simplicity
-                if player.money >= rent:
-                    player.money -= rent
-                    owner.money += rent
-                    return self.normalize_text(f"""
+                if self.__pay_rent(player, owner):
+                    return self.normalize_text(
+                        f"""
                        {player.name}
-                        paid ${rent} rent to {owner.name} for property {property_number}."""
-                        )
-                return self.normalize_text(f"""
+                        paid ${self.__RENT} rent to {owner.name} for property {property_number}."""
+                    )
+                return self.normalize_text(
+                    f"""
                        {player.name} 
                         cannot afford to pay rent for property {property_number}."""
-                        )
-            
-        want_buy = input(self.normalize_text(
-                        f"""
+                )
+
+        want_buy = input(
+            self.normalize_text(
+                f"""
                         {player.name}, you get onto property {property_number}.
-                        Do you want to buy it for ${property_cost}? (yes/no): """))
-        if want_buy.lower() == "yes":
-            if property_number not in self.board.owned_properties[player]:
-                    if player.money > property_cost:
-                        player.money -= property_cost
-                        self.board.owned_properties[player].append(property_number)
-                        return self.normalize_text(f"""
-                                            bought property
-                                            {property_number} for ${property_cost}."""
-                                            )
-                    return self.normalize_text(f"""
-                                           cannot 
-                                           afford property {property_number}."""
-                                           )
-            else:
-                return f"already owns property {property_number}."
-        else:
-            return f"decided not to buy property {property_number}."
+                        Do you want to buy it for ${self.__PROPERTY_COST}? (y/n): """
+            )
+        )
 
-    def make_moves(self) -> dict[MonopolyPlayer, str]:
-        players_actions = {}
+        if want_buy.lower() not in ("y", "yes"):
+            return self.normalize_text(
+                f"{player.name} decided not to buy property {property_number}."
+            )
 
-        for player in self.board.players_list:
-            players_actions[player] = []
-            for item in self.board.items_list:
+        if property_number in self._board.owned_properties.get(player, []):
+            return f"{player.name} already owns property {property_number}."
+
+        if player.money > self.__PROPERTY_COST:
+            player.money -= self.__PROPERTY_COST
+            self._board.owned_properties[player].append(property_number)
+            return self.normalize_text(
+                f"""
+                                {player.name} bought property
+                                {property_number} for ${self.__PROPERTY_COST}."""
+            )
+
+        return self.normalize_text(
+            f"""
+                                {player.name} cannot 
+                                afford property {property_number}."""
+        )
+
+    def make_moves(self) -> None:
+        for player in self._board._players_list:
+            for item in self._board._items_list:
                 if isinstance(item, Dice):
                     points = item.roll_dice()
                     player.chip.move_chip(points)
-                    player.chip.chip_position %= 100  # Assuming a standard Monopoly board with 100 spaces
-                    players_actions[player].append(
-                        f"[{player.chip.chip_position}] Threw a dice, and chip got moved +{points}")
+                    player.chip.chip_position %= 100
+                    self._send_to_ui(
+                        f"[{player.chip.chip_position}] Threw a dice, and chip got moved +{points}"
+                    )
                     sleep(1)
             if player.chip.chip_position % 5 == 0:
-                players_actions[player].append("with property did: " + 
-                                self.__property_action(
-                                    player, player.chip.chip_position))
-        return players_actions
+                self._send_to_ui(
+                    "with property did: "
+                    + self.__property_action(player, player.chip.chip_position)
+                )
