@@ -1,11 +1,11 @@
 from typing import TYPE_CHECKING, Any
 
-from Lab1.Entities.board import BoardGame
+from Entities.boards.board import BoardGame
 from Entities.player import MonopolyPlayer
 from Entities.game_components import IGameComponent, Dice, Chip
 
 if TYPE_CHECKING:
-    from Lab1.Entities.board import GameContext
+    from Entities.boards.board import GameContext
 
 
 class MonopolyBoard(BoardGame):

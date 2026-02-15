@@ -2,8 +2,8 @@ from time import sleep
 from random import randint
 from typing import Callable
 
-from Lab1.GameLogics.logic import GameLogic
-from Entities.mafia_board import MafiaBoard
+from GameLogics.logic import GameLogic
+from Entities.boards.mafia import MafiaBoard
 from Entities.player import MafiaPlayer
 
 
@@ -11,12 +11,12 @@ class MafiaLogic(GameLogic):
     __CIVILIAN = "Civilian"
     __MAFIA = "Mafia"
 
-    def __init__(self, board: MafiaBoard, ui_callback: Callable[[str], None]) -> None:
+    def __init__(self, board: MafiaBoard, ui_callback: Callable[[str, str], None]) -> None:
         if not isinstance(board, MafiaBoard):
             raise TypeError("board must be an instance of MafiaBoard")
         self._board: MafiaBoard = board
         self.__PLAYER_LIST: list[MafiaPlayer] = self._board._players_list
-        self._ui_callback: Callable[[str], None] = ui_callback
+        self._ui_callback: Callable[[str, str], None] = ui_callback
         self.__end = False
 
     def can_start_game(self) -> bool:

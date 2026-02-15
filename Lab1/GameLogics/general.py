@@ -5,17 +5,17 @@ from typing import (
 )
 from abc import ABC, abstractmethod
 
-from Lab1.Entities.board import BoardGame
+from Entities.boards.board import BoardGame
 
 
 class GameLogic(ABC):
     _board: BoardGame | Any
-    _ui_callback: Callable[[str], None]
+    _ui_callback: Callable[[str, str], None]
 
-    def _send_to_ui(self, message: str) -> None:
+    def _send_to_ui(self, message: str, end: str = "\n") -> None:
         if not isinstance(message, str):
             raise TypeError("message must be a string")
-        self._ui_callback(message)
+        self._ui_callback(message, end)
 
     def can_start_game(self) -> bool:
         if len(self._board._players_list) < self._board.min_players:

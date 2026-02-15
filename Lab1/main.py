@@ -35,7 +35,7 @@ def monopoly_sample() -> None:
 
 def mafia_sample() -> None:
     from Entities.game_components import Card
-    from Lab1.Entities.mafia_board import GameContext, MafiaBoard
+    from Entities.mafia_board import GameContext, MafiaBoard
     from Entities.player import MafiaPlayer
     from GameLogics.mafia import MafiaLogic
 

@@ -2,12 +2,12 @@ from typing import TYPE_CHECKING
 
 from pyparsing import Any
 
-from Lab1.Entities.board import BoardGame, IGameComponent
+from Entities.boards.board import BoardGame, IGameComponent
 from Entities.game_components import Card
 from Entities.player import IPlayer, MafiaPlayer
 
 if TYPE_CHECKING:
-    from Lab1.Entities.board import GameContext
+    from Entities.boards.board import GameContext
 
 
 class MafiaBoard(BoardGame):

@@ -1,8 +1,8 @@
 from time import sleep
 from typing import Callable
 
-from Lab1.GameLogics.logic import GameLogic
-from Entities.monopoly_board import MonopolyBoard
+from GameLogics.logic import GameLogic
+from Entities.boards.monopoly import MonopolyBoard
 from Entities.game_components import Dice
 from Entities.player import MonopolyPlayer
 
@@ -11,11 +11,11 @@ class MonopolyLogic(GameLogic):
     __PROPERTY_COST = 80
     __RENT = 20
 
-    def __init__(self, board: MonopolyBoard, ui_callback: Callable[[str], None]) -> None:
+    def __init__(self, board: MonopolyBoard, ui_callback: Callable[[str, str], None]) -> None:
         if not isinstance(board, MonopolyBoard):
             raise TypeError("board must be an instance of MonopolyBoard")
         self._board: MonopolyBoard = board
-        self._ui_callback: Callable[[str], None] = ui_callback
+        self._ui_callback: Callable[[str, str], None] = ui_callback
 
     def is_game_over(self) -> bool:
         bankrupt_amount = 0

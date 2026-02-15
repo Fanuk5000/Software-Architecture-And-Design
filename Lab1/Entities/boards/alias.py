@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Any
 
-from Lab1.Entities.board import BoardGame, IGameComponent
+from Entities.boards.board import BoardGame, IGameComponent
 from Entities.game_components import Card, Chip
 from Entities.player import AliasPlayer
 from Entities.team import AliasTeam
 
 if TYPE_CHECKING:
-    from Lab1.Entities.board import GameContext
+    from Entities.boards.board import GameContext
 
 
 class AliasBoard(BoardGame):
@@ -43,7 +43,14 @@ class AliasBoard(BoardGame):
             self.min_players = 4
             self._players_list: list[AliasPlayer] = []
             self._items_list = []
-        self.teams = [] if teams is None else teams
+        self.teams = (
+            [
+                AliasTeam(str(i), self.players_list[0 + i : 2 + i], Chip(str(i)))
+                for i in range(0, len(self.players_list), 2)
+            ]
+            if teams is None
+            else teams
+        )
 
     @property
     def players_list(self) -> list[AliasPlayer]:
