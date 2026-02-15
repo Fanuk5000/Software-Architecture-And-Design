@@ -2,7 +2,7 @@ from time import sleep
 from random import randint
 from typing import Callable
 
-from GameLogics.logic import GameLogic
+from GameLogics.general import GameLogic
 from Entities.boards.mafia import MafiaBoard
 from Entities.player import MafiaPlayer
 
