@@ -2,7 +2,7 @@ from random import choice, randint
 from time import sleep
 from typing import Callable
 
-from GameLogics.logic import GameLogic
+from GameLogics.general import GameLogic
 from Entities.boards.alias import AliasBoard
 
 

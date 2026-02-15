@@ -4,7 +4,7 @@ from typing import Any, Callable
 from GameLogics.mafia import MafiaLogic
 from GameLogics.monopoly import MonopolyLogic
 from GameLogics.alias import AliasLogic
-from GameLogics.logic import GameLogic
+from GameLogics.general import GameLogic
 
 from Entities.boards.alias import AliasBoard
 from Entities.boards.mafia import MafiaBoard

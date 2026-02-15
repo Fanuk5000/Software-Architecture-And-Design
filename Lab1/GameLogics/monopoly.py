@@ -1,7 +1,7 @@
 from time import sleep
 from typing import Callable
 
-from GameLogics.logic import GameLogic
+from GameLogics.general import GameLogic
 from Entities.boards.monopoly import MonopolyBoard
 from Entities.game_components import Dice
 from Entities.player import MonopolyPlayer
