@@ -3,7 +3,11 @@ from UI.menu import MenuEngine
 
 def main() -> None:
     mn = MenuEngine()
-    mn.run()
+    try:
+        mn.run()
+    except KeyboardInterrupt:
+        print("\n")
+        mn.exit_menu()
 
 
 if __name__ == "__main__":

@@ -41,7 +41,7 @@ class MenuEngine:
                 continue
 
             if action == "Exit":
-                self.__exit_menu()
+                self.exit_menu()
             else:
                 game_logic = self.__create_env(choice)
                 ui_callback(f"Starting game: {action}")
@@ -56,6 +56,6 @@ class MenuEngine:
                         game_logic.make_moves()
                     ui_callback("Game over!")
 
-    def __exit_menu(self) -> None:
+    def exit_menu(self) -> None:
         print("Exiting the menu. Goodbye!")
         exit(0)
