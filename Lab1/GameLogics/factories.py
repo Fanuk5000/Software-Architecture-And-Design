@@ -101,7 +101,7 @@ class GameContextFactory:
             min_players=min_players,
             max_players=max_players,
             players=players,
-            items=[Card(), Dice()],
+            items=[Card(), Chip()],
         )
         return game_context
 

@@ -58,7 +58,7 @@ class MafiaLogic(GameLogic):
                 self._board.mafias.append(player)
 
     def is_game_over(self) -> bool:
-        sleep(1)
+        sleep(0.5)
         if self.__end:
             return True
 
@@ -83,7 +83,7 @@ class MafiaLogic(GameLogic):
             self.__del_player(self._board.day_votes)
 
         if self.is_game_over():
-            sleep(1)
+            sleep(0.5)
             self.__end = True
             return
 

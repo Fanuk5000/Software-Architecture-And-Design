@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class AliasBoard(BoardGame):
     # fmt: off
-    __CARD_WORDS = (
+    CARD_WORDS = (
         "apple", "banana", "cat", "dog", "elephant", "flower", "guitar",
         "house", "ice cream", "jungle", "kite", "lion", "mountain", "notebook",
         "ocean", "pencil", "queen", "rainbow", "sun", "tree", "umbrella","violin",
@@ -24,7 +24,7 @@ class AliasBoard(BoardGame):
         "microphone", "noodle", "octopus", "parrot", "quasar", "rocket",
     )
     # fmt: on
-    __MAX_POSITION = 100
+    MAX_POSITION = 100
 
     def __init__(
         self,

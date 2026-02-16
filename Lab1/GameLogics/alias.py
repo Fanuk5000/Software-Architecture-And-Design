@@ -15,7 +15,7 @@ class AliasLogic(GameLogic):
 
     def is_game_over(self) -> bool:
         for team in self._board.teams:
-            if team.chip.chip_position >= 100:
+            if team.chip.chip_position >= 25:
                 self._send_to_ui(f"The winner is team {team.name}!")
                 return True
         return False
@@ -46,7 +46,7 @@ class AliasLogic(GameLogic):
         words = []
         for _ in "123":
             while True:
-                word = choice(self._board.__CARD_WORDS)
+                word = choice(self._board.CARD_WORDS)
                 if word not in words:
                     words.append(word)
                     break
@@ -59,11 +59,16 @@ class AliasLogic(GameLogic):
             for player in team.players:
                 words = self.__generate_word()
                 for word in words:
-                    self._send_to_ui(f"{player} trying to explain what the word {word} means...")
-                    sleep(0.6)
+                    self._send_to_ui(
+                        f"{player.name} trying to explain what the word {word} means..."
+                    )
+                    sleep(0.5)
                     if randint(0, 1):
                         steps += 1
                         self._send_to_ui(f"Successfully explained it!")
                     else:
                         self._send_to_ui(f"Failed to explain it.")
             team.chip.chip_position += steps
+            self._send_to_ui(
+                f"[{team.chip.chip_position}] Team {team.name} moved {steps} steps forward!"
+            )

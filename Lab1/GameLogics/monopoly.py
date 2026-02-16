@@ -96,9 +96,9 @@ class MonopolyLogic(GameLogic):
                     player.chip.move_chip(points)
                     player.chip.chip_position %= 100
                     self._send_to_ui(
-                        f"[{player.chip.chip_position}] Threw a dice, and chip got moved +{points}"
+                        f"[{player.chip.chip_position}][{player.money}$] {player.name} threw a dice, and chip got moved +{points}"
                     )
-                    sleep(1)
+                    sleep(0.5)
             if player.chip.chip_position % 5 == 0:
                 self._send_to_ui(
                     "with property did: "
