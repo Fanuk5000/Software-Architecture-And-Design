@@ -38,7 +38,7 @@ class MafiaLogic(GameLogic):
 
         for item in self._board._items_list:
             if not self._board._validate_items(item):
-                self._send_to_ui(f"Invalid game item: {type(item).__name__}.")
+                self._send_to_ui(f"Invalid game item: {item}.")
                 return False
         self._send_to_ui("Game can be started.")
         return True

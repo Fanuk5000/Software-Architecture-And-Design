@@ -1,10 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from pyparsing import Any
-
-from Entities.boards.board import BoardGame, IGameComponent
+from Entities.boards.board import BoardGame
+from Entities.game_components import IGameComponent
 from Entities.game_components import Card
-from Entities.player import IPlayer, MafiaPlayer
+from Entities.player import MafiaPlayer
 
 if TYPE_CHECKING:
     from Entities.boards.board import GameContext
@@ -18,7 +17,7 @@ class MafiaBoard(BoardGame):
 
             self.max_players = game_context.max_players
             self.min_players = game_context.min_players
-            self._players_list: list[MafiaPlayer] = game_context.players
+            self._players_list: list[MafiaPlayer] = game_context.players  # type: ignore
             self._items_list = game_context.items
         else:
             self.max_players = 4

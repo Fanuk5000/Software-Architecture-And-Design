@@ -57,7 +57,7 @@ class GameContextFactory:
         player_initials = []
         min_players = int(input("Enter minimum number of players: "))
         max_players = int(input("Enter maximum number of players: "))
-        for player in range(min_players, max_players + 1):
+        for player in range(0, max_players):
             name = input(f"Enter name for player {player + 1}: ")
             surname = input(f"Enter surname for player {player + 1}: ")
             player_initials.append((name, surname))
@@ -87,7 +87,7 @@ class GameContextFactory:
             min_players=min_players,
             max_players=max_players,
             players=players,
-            items=[Card(), Dice()],
+            items=[Chip(), Dice()],
         )
         return game_context
 

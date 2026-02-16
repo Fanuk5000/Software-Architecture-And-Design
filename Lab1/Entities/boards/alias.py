@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
-from Entities.boards.board import BoardGame, IGameComponent
+from Entities.boards.board import BoardGame
+from Entities.game_components import IGameComponent
 from Entities.game_components import Card, Chip
 from Entities.player import AliasPlayer
 from Entities.team import AliasTeam
@@ -36,7 +37,7 @@ class AliasBoard(BoardGame):
 
             self.max_players = game_context.max_players
             self.min_players = game_context.min_players
-            self._players_list: list[AliasPlayer] = game_context.players
+            self._players_list: list[AliasPlayer] = game_context.players  # type: ignore
             self._items_list = game_context.items
         else:
             self.max_players = 4

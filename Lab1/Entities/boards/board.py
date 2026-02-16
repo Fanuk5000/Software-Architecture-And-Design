@@ -1,27 +1,26 @@
 from typing import Any, TYPE_CHECKING
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
-
+from Entities.player import IPlayer
 
 if TYPE_CHECKING:
-    from Entities.player import IPlayer
     from Entities.game_components import IGameComponent
 
 
 class BoardGame(ABC):
     max_players: int
     min_players: int
-    _players_list: list["IPlayer" | Any]
+    _players_list: list[IPlayer | Any]
     _items_list: list["IGameComponent"]
 
     @property
     @abstractmethod
-    def players_list(self) -> list["IPlayer" | Any]:
+    def players_list(self) -> list[IPlayer | Any]:
         return self._players_list
 
     @players_list.setter
     @abstractmethod
-    def players_list(self, value: list["IPlayer" | Any]) -> None: ...
+    def players_list(self, value: list[IPlayer | Any]) -> None: ...
 
     @abstractmethod
     def _validate_items(self, component) -> bool: ...
@@ -43,7 +42,7 @@ class BoardGame(ABC):
 class GameContext:
     min_players: int
     max_players: int
-    players: Any["IPlayer"] = field(default_factory=list)  # forward ref to avoid import
+    players: list[IPlayer | Any] = field(default_factory=list)  # forward ref to avoid import
     items: list["IGameComponent"] = field(default_factory=list)
 
     def __post_init__(self) -> None:

@@ -14,8 +14,8 @@ def ui_callback(message: str, end: str = "\n") -> None:
 class MenuEngine:
     def __init__(self) -> None:
         self.__options = {
-            "1": "Play Monopoly",
-            "2": "Play Mafia",
+            "1": "Play Mafia",
+            "2": "Play Monopoly",
             "3": "Play Alias",
             "4": "Exit",
         }

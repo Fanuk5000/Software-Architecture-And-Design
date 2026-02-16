@@ -29,7 +29,7 @@ class GameLogic(ABC):
 
         for item in self._board._items_list:
             if not self._board._validate_items(item):
-                self._send_to_ui(f"Invalid game item: {item}.")
+                self._send_to_ui(f"Invalid game item: {item.item_name}.")
                 return False
 
         self._send_to_ui("Game can be started.")
