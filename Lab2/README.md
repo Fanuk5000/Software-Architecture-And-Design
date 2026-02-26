@@ -24,7 +24,31 @@
 ### Структура лабораторної
 
 ```
-
+├── Entities
+│   ├── boards
+│   │   ├── alias.py
+│   │   ├── board.py
+│   │   ├── __init__.py
+│   │   ├── mafia.py
+│   │   └── monopoly.py
+│   ├── game_components.py
+│   ├── __init__.py
+│   ├── player.py
+│   └── team.py
+├── GameLogics
+│   ├── helpers
+│   │   ├── event.py
+│   │   └── factories.py
+│   ├── alias.py
+│   ├── general.py
+│   ├── __init__.py
+│   ├── mafia.py
+│   └── monopoly.py
+└── UI
+    ├── __init__.py
+    └── menu.py
+├── main.py
+├── README.md
 ```
 
 - **Entities** містить сутності для взаємодії
