@@ -1,8 +1,7 @@
-from typing import Protocol, runtime_checkable, TYPE_CHECKING
-
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from Entities.game_components import Chip, Card
+    from Entities.game_components import Card, Chip
 
 
 @runtime_checkable

@@ -6,6 +6,9 @@ from Entities.player import MonopolyPlayer
 
 from GameLogics.general import GameLogic
 from GameLogics.helpers.event import Event
+from GameLogics.helpers.read_config import read_config
+
+config = read_config("config.json")
 
 
 class MonopolyLogic(GameLogic):
@@ -99,7 +102,7 @@ class MonopolyLogic(GameLogic):
                     self._send_to_ui(
                         f"[{player.chip.chip_position}][{player.money}$] {player.name} threw a dice, and chip got moved +{points}"
                     )
-                    sleep(0.5)
+                    sleep(config.get("sleep_time", 0.5))
             if player.chip.chip_position % 5 == 0:
                 self._send_to_ui(
                     "with property did: "

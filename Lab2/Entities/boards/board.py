@@ -1,6 +1,7 @@
-from typing import Any, TYPE_CHECKING
-from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
+
 from Entities.player import IPlayer
 
 if TYPE_CHECKING:
@@ -30,7 +31,9 @@ class BoardGame(ABC):
             raise TypeError("Wrong obj, must be a player")
 
         if len(self._players_list) >= self.max_players:
-            raise ValueError(f"Cannot add player: max players ({self.max_players}) reached")
+            raise ValueError(
+                f"Cannot add player: max players ({self.max_players}) reached"
+            )
 
         self._players_list.append(new_player)
 
@@ -42,7 +45,9 @@ class BoardGame(ABC):
 class GameContext:
     min_players: int
     max_players: int
-    players: list[IPlayer | Any] = field(default_factory=list)  # forward ref to avoid import
+    players: list[IPlayer | Any] = field(
+        default_factory=list
+    )  # forward ref to avoid import
     items: list["IGameComponent"] = field(default_factory=list)
 
     def __post_init__(self) -> None:

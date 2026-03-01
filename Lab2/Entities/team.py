@@ -1,9 +1,9 @@
-from typing import Any, TYPE_CHECKING, Union
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Any, Union
 
 if TYPE_CHECKING:
-    from Entities.player import IPlayer, AliasPlayer
     from Entities.game_components import Chip
+    from Entities.player import AliasPlayer, IPlayer
 
 
 class Team(ABC):

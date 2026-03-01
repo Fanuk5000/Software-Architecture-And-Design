@@ -5,6 +5,9 @@ from Entities.boards.alias import AliasBoard
 
 from GameLogics.general import GameLogic
 from GameLogics.helpers.event import Event
+from GameLogics.helpers.read_config import read_config
+
+config = read_config("config.json")
 
 
 class AliasLogic(GameLogic):
@@ -63,7 +66,7 @@ class AliasLogic(GameLogic):
                     self._send_to_ui(
                         f"{player.name} trying to explain what the word {word} means..."
                     )
-                    sleep(0.5)
+                    sleep(config.get("sleep_time", 0.5))
                     if randint(0, 1):
                         steps += 1
                         self._send_to_ui("Successfully explained it!")

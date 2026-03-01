@@ -1,8 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
 from Entities.boards.board import BoardGame
-from Entities.game_components import IGameComponent
-from Entities.game_components import Card, Chip
+from Entities.game_components import Card, Chip, IGameComponent
 from Entities.player import AliasPlayer
 from Entities.team import AliasTeam
 
@@ -68,10 +67,14 @@ class AliasBoard(BoardGame):
         player_amount = len(value)
 
         if player_amount > self.max_players:
-            raise ValueError(f"Cannot set players_list: max players ({self.max_players}) exceeded")
+            raise ValueError(
+                f"Cannot set players_list: max players ({self.max_players}) exceeded"
+            )
 
         if player_amount < self.min_players:
-            raise ValueError(f"Cannot set players_list: min players ({self.min_players}) not met")
+            raise ValueError(
+                f"Cannot set players_list: min players ({self.min_players}) not met"
+            )
 
         if player_amount != len(set(value)):
             raise ValueError("Duplicate players are not allowed")

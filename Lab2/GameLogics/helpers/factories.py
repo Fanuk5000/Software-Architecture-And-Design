@@ -7,6 +7,7 @@ from Entities.boards.mafia import MafiaBoard
 from Entities.boards.monopoly import MonopolyBoard
 from Entities.game_components import Card, Chip, Dice
 from Entities.player import AliasPlayer, MafiaPlayer, MonopolyPlayer
+
 from GameLogics.alias import AliasLogic
 from GameLogics.mafia import MafiaLogic
 from GameLogics.monopoly import MonopolyLogic

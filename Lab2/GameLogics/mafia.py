@@ -6,6 +6,9 @@ from Entities.player import MafiaPlayer
 
 from GameLogics.general import GameLogic
 from GameLogics.helpers.event import Event
+from GameLogics.helpers.read_config import read_config
+
+config = read_config("config.json")
 
 
 class MafiaLogic(GameLogic):
@@ -64,7 +67,7 @@ class MafiaLogic(GameLogic):
                 self._board.mafias.append(player)
 
     def is_game_over(self) -> bool:
-        sleep(0.5)
+        sleep(config.get("sleep_time", 0.5))
         if self.__end:
             return True
 
@@ -91,7 +94,7 @@ class MafiaLogic(GameLogic):
             self.__del_player(self._board.day_votes)
 
         if self.is_game_over():
-            sleep(0.5)
+            sleep(config.get("sleep_time", 0.5))
             self.__end = True
             return
 

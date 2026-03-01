@@ -1,8 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
 from Entities.boards.board import BoardGame
-from Entities.game_components import IGameComponent
-from Entities.game_components import Card
+from Entities.game_components import Card, IGameComponent
 from Entities.player import MafiaPlayer
 
 if TYPE_CHECKING:
@@ -41,10 +40,14 @@ class MafiaBoard(BoardGame):
             raise TypeError("All players must be MafiaPlayer instances")
 
         if len(value) > self.max_players:
-            raise ValueError(f"Cannot set players_list: max players ({self.max_players}) exceeded")
+            raise ValueError(
+                f"Cannot set players_list: max players ({self.max_players}) exceeded"
+            )
 
         if len(value) < self.min_players:
-            raise ValueError(f"Cannot set players_list: min players ({self.min_players}) not met")
+            raise ValueError(
+                f"Cannot set players_list: min players ({self.min_players}) not met"
+            )
 
         self._players_list = value
 
