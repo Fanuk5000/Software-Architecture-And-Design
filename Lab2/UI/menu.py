@@ -25,7 +25,7 @@ class MenuEngine:
         print(message, end=end)
 
     def __display_menu(self) -> None:
-        print("Welcome to the Game Menu!")
+        print("\nWelcome to the Game Menu!")
         for key, description in self.__options.items():
             print(f"{key}. {description[0]}")
 
@@ -66,7 +66,7 @@ class MenuEngine:
                     while not game_logic.is_game_over():
                         game_logic.make_moves()
                     game_logic.game_notification -= self.__display_game_message
-                    print("Game over!")
+                    print("\nGame over!")
 
     def exit_menu(self) -> None:
         print("Exiting the menu. Goodbye!")
