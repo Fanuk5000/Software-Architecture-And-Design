@@ -21,7 +21,7 @@ class MenuEngine:
             "4": ("Exit", None),
         }
 
-    def display_game_message(self, message, end) -> None:
+    def __display_game_message(self, message, end) -> None:
         print(message, end=end)
 
     def __display_menu(self) -> None:
@@ -55,7 +55,7 @@ class MenuEngine:
                     continue
                 print(f"Starting game: {action[0].split()[1]}")
                 # here we subscribe the menu's display_game_message method to the game_notification event of the game logic
-                game_logic.game_notification += self.display_game_message
+                game_logic.game_notification += self.__display_game_message
 
                 game_logic.read_rules()
 
