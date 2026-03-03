@@ -65,6 +65,7 @@ class MenuEngine:
                 if game_logic.can_start_game():
                     while not game_logic.is_game_over():
                         game_logic.make_moves()
+                    game_logic.game_notification -= self.__display_game_message
                     print("Game over!")
 
     def exit_menu(self) -> None:
