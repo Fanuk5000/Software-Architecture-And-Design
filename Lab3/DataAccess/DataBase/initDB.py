@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./async_app.db"
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./quest_rooms.db"
 
 engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
@@ -17,5 +17,6 @@ class Base(DeclarativeBase):
 
 
 async def get_db():
+    """Returns a generator for DB session"""
     async with async_session() as session:
         yield session

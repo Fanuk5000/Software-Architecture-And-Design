@@ -1,25 +1,31 @@
+from typing import Generic, Optional, Type, TypeVar
+
 import sqlalchemy.ext.asyncio
-from DataAccess.abstracteses import AbstractRepository
-from DataAccess.DB.models import QuestRoom
+from DataAccess.abstracts import AbstractRepository
 from sqlalchemy import select
 
+T = TypeVar("T")
 
-class QuestRoomRepository(AbstractRepository):
-    def __init__(self, session: sqlalchemy.ext.asyncio.AsyncSession) -> None:
+
+class GenericRepository(AbstractRepository[T], Generic[T]):
+    def __init__(
+        self, session: sqlalchemy.ext.asyncio.AsyncSession, model: Type[T]
+    ) -> None:
         self.session = session
+        self.model = model
 
-    async def add(self, entity: QuestRoom) -> None:
+    async def add(self, entity: T) -> None:
         self.session.add(entity)
 
-    async def get_by_id(self, id: int) -> QuestRoom | None:
-        return await self.session.get(QuestRoom, id)
+    async def get_by_id(self, id: int) -> Optional[T]:
+        return await self.session.get(self.model, id)
 
-    async def get_all(self) -> list[QuestRoom]:
-        result = await self.session.execute(select(QuestRoom))
+    async def get_all(self) -> list[T]:
+        result = await self.session.execute(select(self.model))
         return list(result.scalars().all())
 
-    async def update(self, entity: QuestRoom) -> None:
+    async def update(self, entity: T) -> None:
         await self.session.merge(entity)
 
-    async def delete(self, entity: QuestRoom) -> None:
+    async def delete(self, entity: T) -> None:
         await self.session.delete(entity)

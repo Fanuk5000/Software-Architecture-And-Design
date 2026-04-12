@@ -1,16 +1,23 @@
-from DataAccess.abstracteses import AbstractUnitOfWork
-from DataAccess.repository import QuestRoomRepository
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from typing import Generic, Type, TypeVar
+
+from DataAccess.abstracts import AbstractUnitOfWork
+from DataAccess.repository import GenericRepository
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from Lab3.DataAccess.repository import GenericRepository
+
+T = TypeVar("T")
 
 
-class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
-    def __init__(self, session_factory: async_sessionmaker):
-        self.session_factory = session_factory
-        self.session = None
+class SqlAlchemyUnitOfWork(AbstractUnitOfWork, Generic[T]):
+    def __init__(self, session_factory: async_sessionmaker) -> None:
+        self.__session_factory = session_factory
+        self.__session: AsyncSession | None = None
 
     async def __aenter__(self):
-        self.session = self.session_factory()
-        self.quest_rooms = QuestRoomRepository(self.session)
+        self.__session = self.__session_factory()
+        if self.__session is None:
+            raise RuntimeError("Failed to create a session.")
         return await super().__aenter__()
 
     async def __aexit__(self, exc_type, exc_val, traceback):
@@ -18,19 +25,24 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         if exc_type is not None:
             await self.rollback()
 
-        if self.session is not None:
-            await self.session.close()
+        if self.__session is not None:
+            await self.__session.close()
         else:
             raise RuntimeError("Session was not created.")
 
+    def get_repository(self, model: Type[T]) -> GenericRepository[T]:
+        if self.__session is None:
+            raise RuntimeError("Enter the unit of work before getting a repository.")
+        return GenericRepository[T](self.__session, model)
+
     async def commit(self):
-        if self.session is not None:
-            await self.session.commit()
+        if self.__session is not None:
+            await self.__session.commit()
         else:
             raise RuntimeError("Session was not created.")
 
     async def rollback(self):
-        if self.session is not None:
-            await self.session.rollback()
+        if self.__session is not None:
+            await self.__session.rollback()
         else:
             raise RuntimeError("Session was not created.")

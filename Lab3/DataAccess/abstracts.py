@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, Optional, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
 T = TypeVar("T")
 
@@ -27,14 +27,16 @@ class AbstractRepository(ABC, Generic[T]):
 
 
 class AbstractUnitOfWork(ABC):
-    quest_rooms: AbstractRepository
-
     async def __aenter__(self):
         return self
 
     async def __aexit__(self, exc_type, exc_val, traceback):
         if exc_type:
             await self.rollback()
+
+    @abstractmethod
+    def get_repository(self, model) -> AbstractRepository | Any:
+        pass
 
     @abstractmethod
     async def commit(self):
