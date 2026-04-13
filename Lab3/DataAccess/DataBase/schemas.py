@@ -16,6 +16,8 @@ class QuestRoom(BaseModel):
     name: str
     max_participants: int
     min_participants: int
+    price: int
+    working_hours: str
     description: str | None = None
 
 

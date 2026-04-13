@@ -1,52 +1,59 @@
 from DataAccess.DataBase.initDB import Base
 from sqlalchemy import (
     Boolean,
-    Column,
     Date,
     ForeignKey,
     Integer,
     String,
 )
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    money = Column(Integer, default=0)
-    password_hash = Column(String, nullable=False)
-    is_admin = Column(Boolean, default=False)
-    is_active = Column(Boolean, default=True)
-    has_certificate = Column(Boolean, default=False)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    username: Mapped[str] = mapped_column(
+        String, unique=True, index=True, nullable=False
+    )
+    money: Mapped[int] = mapped_column(Integer, default=0)
+    password: Mapped[str] = mapped_column(String, nullable=False)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    has_certificate: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class QuestRoom(Base):
     __tablename__ = "quest_rooms"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True, nullable=False)
-    price = Column(Integer, nullable=False)
-    max_participants = Column(Integer, nullable=False)
-    min_participants = Column(Integer, nullable=False)
-    description = Column(String, nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    max_participants: Mapped[int] = mapped_column(Integer, nullable=False)
+    min_participants: Mapped[int] = mapped_column(Integer, nullable=False)
+    price: Mapped[int] = mapped_column(Integer, nullable=False)
+    working_hours: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str] = mapped_column(String, nullable=True)
 
 
 class Booking(Base):
     __tablename__ = "bookings"
 
-    id = Column(Integer, primary_key=True, index=True)
-    quest_room_id = Column(Integer, ForeignKey("quest_rooms.id"), nullable=False)
-    customer_name = Column(String, nullable=False)
-    participants_amount = Column(Integer, nullable=False)
-    booking_date = Column(Date, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    quest_room_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("quest_rooms.id"), nullable=False
+    )
+    customer_name: Mapped[str] = mapped_column(String, nullable=False)
+    participants_amount: Mapped[int] = mapped_column(Integer, nullable=False)
+    booking_date: Mapped[Date] = mapped_column(Date, nullable=False)
 
 
 class Certificate(Base):
     __tablename__ = "certificates"
 
-    id = Column(Integer, primary_key=True, index=True)
-    code = Column(String, unique=True, index=True, nullable=False)
-    discount_percentage = Column(Integer, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    is_active = Column(Boolean, default=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    code: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    discount_percentage: Mapped[int] = mapped_column(Integer, nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=False
+    )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
