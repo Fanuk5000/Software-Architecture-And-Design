@@ -56,7 +56,7 @@ class BookingService:
             if chosen_room is None:
                 raise ValueError("Room not found")
 
-            discounted_price = chosen_room.price.value * (1 - discount_percentage / 100)
+            discounted_price = chosen_room.price * (1 - discount_percentage / 100)
             if user.money < discounted_price:
                 raise ValueError("Not enough money")
 
@@ -85,8 +85,8 @@ class BookingService:
 
         if not isinstance(chosen_room, QuestRoomModel):
             raise ValueError("Room not found")
-        min_parts = chosen_room.min_participants.value
-        max_parts = chosen_room.max_participants.value
+        min_parts = chosen_room.min_participants
+        max_parts = chosen_room.max_participants
 
         if (
             customer_request.person_amount < min_parts
