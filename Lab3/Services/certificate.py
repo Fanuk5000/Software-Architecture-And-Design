@@ -31,7 +31,7 @@ class CertificateService:
     async def update_cert(self, cert: CertificateModel) -> None:
         async with self.__uow as uow:
             certs_repo = uow.get_repository(CertificateModel)
-            cert_to_update = await certs_repo.get_by_id(cert.id.value)
+            cert_to_update = await certs_repo.get_by_id(cert.id)
             if cert_to_update is None:
                 raise ValueError("Certificate not found")
             await certs_repo.update(cert)
