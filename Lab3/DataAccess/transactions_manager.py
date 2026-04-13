@@ -1,18 +1,26 @@
-from typing import Generic, Type, TypeVar
+from typing import Any, Callable, Generic, Type, TypeVar
 
 from DataAccess.abstracts import AbstractUnitOfWork
 from DataAccess.repository import GenericRepository
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
-from Lab3.DataAccess.repository import GenericRepository
+from sqlalchemy.ext.asyncio import AsyncSession
 
 T = TypeVar("T")
 
 
-class SqlAlchemyUnitOfWork(AbstractUnitOfWork, Generic[T]):
-    def __init__(self, session_factory: async_sessionmaker) -> None:
+class SqlAlchemyUnitOfWork(
+    AbstractUnitOfWork,
+    Generic[T],
+):
+    def __init__(
+        self,
+        session_factory: Callable[[], AsyncSession],
+        repository: Callable[[AsyncSession, Type[T]], GenericRepository[T] | Any[T]],
+    ) -> None:
         self.__session_factory = session_factory
         self.__session: AsyncSession | None = None
+        self.__repository: Callable[
+            [AsyncSession, Type[T]], GenericRepository[T] | Any[T]
+        ] = repository
 
     async def __aenter__(self):
         self.__session = self.__session_factory()
@@ -33,7 +41,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork, Generic[T]):
     def get_repository(self, model: Type[T]) -> GenericRepository[T]:
         if self.__session is None:
             raise RuntimeError("Enter the unit of work before getting a repository.")
-        return GenericRepository[T](self.__session, model)
+        return self.__repository(self.__session, model)
 
     async def commit(self):
         if self.__session is not None:
