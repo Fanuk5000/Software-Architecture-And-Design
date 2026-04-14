@@ -9,4 +9,3 @@ class CustomerRequest:
     customer_name: str
     person_amount: int
     book_date: datetime
-    money_given: int
