@@ -42,6 +42,11 @@ class QuestRoomService:
                     available_rooms.append(room)
             return available_rooms
 
+    async def see_all_rooms(self) -> list[QuestRoom] | list[None]:
+        async with self.__uow as uow:
+            rooms_repo = uow.get_repository(QuestRoomModel)
+            return await rooms_repo.get_all()
+
     async def add_room(self, room: QuestRoomModel) -> None:
         async with self.__uow as uow:
             rooms_repo = uow.get_repository(QuestRoomModel)
