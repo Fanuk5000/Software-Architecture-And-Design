@@ -1,12 +1,22 @@
 import asyncio
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    pass
 
 
 async def main():
     from DataAccess.DataBase.initDB import init_db
     from UI.menu import MenuEngine
 
+    global menu_engine
+
     await init_db()
     menu_engine = MenuEngine()
+    await _start_menu()
+
+
+async def _start_menu():
     have_user = input("Do you have an account? (yes/no): ").strip().lower()
     if have_user == "yes":
         user_id = await menu_engine.login_user()
@@ -27,4 +37,4 @@ if __name__ == "__main__":
         print("\nExiting the application.")
     except ChangeUser:
         print("\nChanging user...")
-        asyncio.run(main())
+        asyncio.run(_start_menu())

@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import sleep
 
 from DataAccess.DataBase.initDB import async_session
 from DataAccess.DataBase.models import Certificate as CertificateModel
@@ -31,7 +32,6 @@ async def _exit() -> None:
 
 class MenuEngine:
     def __init__(self) -> None:
-
         self.__user_uow = SqlAlchemyUnitOfWork(
             async_session, lambda s, m: UserRepository(s)
         )
@@ -95,7 +95,13 @@ class MenuEngine:
         username = input("Enter username: ")
         password = input("Enter password: ")
 
-        user_id = await self.__user_serv.login_user(username, password)
+        try:
+            user_id = await self.__user_serv.login_user(username, password)
+        except ValueError:
+            print(
+                "Invalid username or password, or user is not active. Please try again."
+            )
+            return await self.login_user()
         return user_id
 
     async def display_menu(self, user_id: int) -> None:
@@ -108,6 +114,7 @@ class MenuEngine:
             options = self.__admin_options if user.is_admin else self.__user_options
 
             while True:
+                sleep(0.5)
                 print("\nMenu:")
                 for key, (description, _) in options.items():
                     print(f"{key}. {description}")
@@ -135,11 +142,14 @@ class _MenuRequests:
     async def see_all_rooms(self) -> None:
         rooms = await self.__quest_serv.see_all_rooms()
         if not rooms:
-            print("No rooms available.")
+            print("No rooms exist.")
         else:
-            print("Available rooms:")
+            print("Existing rooms:")
             for room in rooms:
-                print(f"ID: {room.id}, Name: {room.name}, Price: {room.price}")  # pyright: ignore[reportOptionalMemberAccess]
+                if room is not None:
+                    print(
+                        f"ID: {room.id}, Name: {room.name}, Price: {room.price}, Description: {room.description}, Working Hours: {room.working_hours}"
+                    )
 
     async def check_available_rooms(self) -> None:
         book_date = input("Enter a booking date (HH-DD-MM): ")
@@ -150,7 +160,10 @@ class _MenuRequests:
 
         print("Available rooms:")
         for room in available_rooms:
-            print(f"ID: {room.id}, Name: {room.name}, Price: {room.price}")  # pyright: ignore[reportOptionalMemberAccess]
+            if room is not None:
+                print(
+                    f"ID: {room.id}, Name: {room.name}, Price: {room.price}, Description: {room.description}, Working Hours: {room.working_hours}"
+                )
 
     async def get_room_by_id(self) -> None:
         room_id = int(input("Enter room ID: "))
@@ -158,7 +171,9 @@ class _MenuRequests:
         if room is None:
             print("Room not found.")
         else:
-            print(f"ID: {room.id}, Name: {room.name}, Price: {room.price}")
+            print(
+                f"ID: {room.id}, Name: {room.name}, Price: {room.price}, Description: {room.description}, Working Hours: {room.working_hours}"
+            )
 
     async def book_room(self) -> None:
         user_id = int(input("Enter your user ID: "))
@@ -184,7 +199,7 @@ class _MenuRequests:
         price = float(input("Enter room price: "))
         min_persons = int(input("Enter minimum number of participants: "))
         max_persons = int(input("Enter maximum number of participants: "))
-        working_hours = input("Enter working hours (e.g., 10:00-22:00): ")
+        working_hours = input("Enter working hours (e.g., 10-22): ")
         description = input("Enter room description (optional): ")
 
         new_room = QuestRoomModel(
@@ -196,7 +211,11 @@ class _MenuRequests:
             description=description,
         )
 
-        await self.__quest_serv.add_room(new_room)
+        try:
+            await self.__quest_serv.add_room(new_room)
+        except ValueError:
+            print("Invalid time format. Please try again.")
+            await self.add_room()
 
     async def delete_room(self) -> None:
         room_id = int(input("Enter room ID to delete: "))
@@ -208,7 +227,7 @@ class _MenuRequests:
         price = float(input("Enter new room price: "))
         min_persons = int(input("Enter new minimum number of participants: "))
         max_persons = int(input("Enter new maximum number of participants: "))
-        working_hours = input("Enter new working hours (e.g., 10:00-22:00): ")
+        working_hours = input("Enter new working hours (e.g., 10-22): ")
         description = input("Enter new room description (optional): ")
 
         updated_room = QuestRoomModel(
@@ -221,7 +240,11 @@ class _MenuRequests:
             description=description,
         )
 
-        await self.__quest_serv.update_room(updated_room)
+        try:
+            await self.__quest_serv.update_room(updated_room)
+        except ValueError:
+            print("Invalid time format. Please try again.")
+            await self.update_room()
 
     async def add_cert(self) -> None:
         code = input("Enter certificate code: ")
