@@ -1,3 +1,5 @@
+import re
+
 from DataAccess.DataBase.initDB import Base
 from sqlalchemy import (
     Boolean,
@@ -6,7 +8,7 @@ from sqlalchemy import (
     Integer,
     String,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 
 class User(Base):
@@ -32,6 +34,14 @@ class QuestRoom(Base):
     min_participants: Mapped[int] = mapped_column(Integer, nullable=False)
     price: Mapped[int] = mapped_column(Integer, nullable=False)
     working_hours: Mapped[str] = mapped_column(String, nullable=False)
+
+    @validates("working_hours")
+    def validate_working_hours(self, key, value: str) -> str:
+        # Generic "num-num" pattern (no '-' inside each side)
+        if not re.match(r"^[^-]+\d{2}-[^-]+\d{2}$", value):
+            raise ValueError("working_hours must match 'num-num' (e.g. '10-22')")
+        return value
+
     description: Mapped[str] = mapped_column(String, nullable=True)
 
 
