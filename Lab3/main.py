@@ -1,10 +1,10 @@
 import asyncio
 
-from DataAccess.DataBase.initDB import init_db
-from UI.menu import ChangeUser, MenuEngine
-
 
 async def main():
+    from DataAccess.DataBase.initDB import init_db
+    from UI.menu import MenuEngine
+
     await init_db()
     menu_engine = MenuEngine()
     have_user = input("Do you have an account? (yes/no): ").strip().lower()
@@ -19,9 +19,11 @@ async def main():
 
 
 if __name__ == "__main__":
+    from UI.menu import ChangeUser
+
     try:
         asyncio.run(main())
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         print("\nExiting the application.")
     except ChangeUser:
         print("\nChanging user...")
