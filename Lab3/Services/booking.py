@@ -1,7 +1,6 @@
 from DataAccess.DataBase.models import Booking as BookingModel
 from DataAccess.DataBase.models import QuestRoom as QuestRoomModel
 from DataAccess.DataBase.models import User as UserModel
-from DataAccess.DataBase.schemas import QuestRoom
 
 #
 from DataAccess.repository import GenericRepository
@@ -73,7 +72,7 @@ class BookingService:
     async def __verify_booking(
         self,
         customer_request: CustomerRequest,
-        available_rooms: list[QuestRoom] | list[None],
+        available_rooms: list[QuestRoomModel] | list[None],
         rooms_repo: GenericRepository[QuestRoomModel],
     ) -> bool:
         if not available_rooms:

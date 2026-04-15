@@ -5,7 +5,6 @@ from DataAccess.DataBase.models import Booking as BookingModel
 from DataAccess.DataBase.models import QuestRoom as QuestRoomModel
 
 #
-from DataAccess.DataBase.schemas import Booking, QuestRoom
 from DataAccess.repository import GenericRepository
 from DataAccess.transactions_manager import SqlAlchemyUnitOfWork
 
@@ -22,17 +21,17 @@ class QuestRoomService:
         date: datetime,
         rooms_repo: GenericRepository[Any] | None = None,
         bookings_repo: GenericRepository[Any] | None = None,
-    ) -> list[QuestRoom] | list[None]:
+    ) -> list[QuestRoomModel] | list[None]:
         async with self.__uow as uow:
-            available_rooms: list[QuestRoom] = []
+            available_rooms: list[QuestRoomModel] = []
 
             if rooms_repo is None:
                 rooms_repo = uow.get_repository(QuestRoomModel)
             if bookings_repo is None:
                 bookings_repo = uow.get_repository(BookingModel)
 
-            all_rooms: list[QuestRoom] = await rooms_repo.get_all()
-            all_bookings: list[Booking] = await bookings_repo.get_all()
+            all_rooms: list[QuestRoomModel] = await rooms_repo.get_all()
+            all_bookings: list[BookingModel] = await bookings_repo.get_all()
 
             for room in all_rooms:
                 if all(
@@ -42,7 +41,7 @@ class QuestRoomService:
                     available_rooms.append(room)
             return available_rooms
 
-    async def see_all_rooms(self) -> list[QuestRoom] | list[None]:
+    async def see_all_rooms(self) -> list[QuestRoomModel] | list[None]:
         async with self.__uow as uow:
             rooms_repo = uow.get_repository(QuestRoomModel)
             return await rooms_repo.get_all()
