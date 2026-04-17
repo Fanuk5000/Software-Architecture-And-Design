@@ -38,8 +38,14 @@ class QuestRoom(Base):
     @validates("working_hours")
     def validate_working_hours(self, key, value: str) -> str:
         # Generic "num-num" pattern (no '-' inside each side)
-        if not re.match(r"^[^-]+\d{2}-[^-]+\d{2}$", value):
+        match = re.match(r"^(\d{1,2})-(\d{1,2})$", value)
+        if not match:
             raise ValueError("working_hours must match 'num-num' (e.g. '10-22')")
+        start, end = int(match.group(1)), int(match.group(2))
+        if not (0 <= start < 24 and 0 <= end < 24):
+            raise ValueError("Hours must be between 0 and 23")
+        if start >= end:
+            raise ValueError("Start hour must be less than end hour")
         return value
 
     description: Mapped[str] = mapped_column(String, nullable=True)
