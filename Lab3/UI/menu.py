@@ -1,4 +1,6 @@
 from datetime import datetime
+from os import name as os_name
+from subprocess import call
 from time import sleep
 
 from DataAccess.DataBase.initDB import async_session
@@ -20,6 +22,10 @@ from Services.user import UserService
 
 class ChangeUser(SystemExit):
     pass
+
+
+async def clear_screen() -> None:
+    call("cls" if os_name == "nt" else "clear", shell=True)
 
 
 async def _change_user() -> None:
@@ -114,7 +120,8 @@ class MenuEngine:
             options = self.__admin_options if user.is_admin else self.__user_options
 
             while True:
-                sleep(0.5)
+                sleep(1)
+                await clear_screen()
                 print("\nMenu:")
                 for key, (description, _) in options.items():
                     print(f"{key}. {description}")
