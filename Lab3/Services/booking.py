@@ -1,3 +1,5 @@
+from typing import Any
+
 from DataAccess.DataBase.models import Booking as BookingModel
 from DataAccess.DataBase.models import QuestRoom as QuestRoomModel
 from DataAccess.DataBase.models import User as UserModel
@@ -19,7 +21,7 @@ class BookingService:
         cert_service: CertificateService | None = None,
         quest_service: QuestRoomService | None = None,
     ) -> None:
-        self.__uow = uow_factory
+        self.__uow: SqlAlchemyUnitOfWork[Any] = uow_factory
 
         self.__certService = (
             CertificateService(uow_factory) if cert_service is None else cert_service
@@ -29,7 +31,6 @@ class BookingService:
         )
 
     async def book_room(self, customer_request: CustomerRequest):
-
         async with self.__uow as uow:
             bookings_repo = uow.get_repository(BookingModel)
             rooms_repo = uow.get_repository(QuestRoomModel)
@@ -41,23 +42,29 @@ class BookingService:
                 bookings_repo=bookings_repo,
             )
 
-            discount_percentage = await self.__certService.use_cert(
-                customer_request.user_id, customer_request.user_id
+            # Verify booking details before proceeding
+            user: UserModel | None = await user_repo.get_by_id(customer_request.user_id)
+            await self.__verify_booking(
+                customer_request, available_rooms, rooms_repo, user
             )
 
-            await self.__verify_booking(customer_request, available_rooms, rooms_repo)
-
-            user = await user_repo.get_by_id(customer_request.user_id)
-            if user is None:
-                raise ValueError("User not found")
-
-            chosen_room = await rooms_repo.get_by_id(customer_request.room_id)
+            # If verification passed, proceed with booking
+            chosen_room: QuestRoomModel | None = await rooms_repo.get_by_id(
+                customer_request.room_id
+            )
             if chosen_room is None:
                 raise ValueError("Room not found")
 
-            discounted_price = chosen_room.price * (1 - discount_percentage / 100)
-            if user.money < discounted_price:
+            # Calculate discounted price if user has a certificate
+            discounted_price = await self.__calculate_discounted_price(
+                chosen_room.price,
+                user,  # pyright: ignore[reportArgumentType]
+                customer_request.user_id,  # pyright: ignore[reportArgumentType]
+            )
+            if user.money < discounted_price:  # pyright: ignore[reportOptionalMemberAccess]
                 raise ValueError("Not enough money")
+            user.money -= discounted_price  # pyright: ignore[reportOptionalMemberAccess]
+            await user_repo.update(user)
 
             new_booking = BookingModel(
                 quest_room_id=customer_request.room_id,
@@ -74,7 +81,11 @@ class BookingService:
         customer_request: CustomerRequest,
         available_rooms: list[QuestRoomModel] | list[None],
         rooms_repo: GenericRepository[QuestRoomModel],
+        user: UserModel | None,
     ) -> bool:
+        if user is None:
+            raise ValueError("User not found")
+
         if not available_rooms:
             raise ValueError("There is no available room")
 
@@ -96,3 +107,18 @@ class BookingService:
             )
 
         return True
+
+    async def __calculate_discounted_price(
+        self,
+        room_price: int,
+        user: UserModel,
+        user_id: int,
+    ) -> int:
+        if user.has_certificate:
+            discount_percentage = await self.__certService.use_cert(user_id)
+        else:
+            discount_percentage = 0
+
+        discounted_price = room_price * (1 - discount_percentage / 100)
+
+        return int(discounted_price)
