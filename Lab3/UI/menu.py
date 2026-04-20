@@ -36,6 +36,11 @@ async def _exit() -> None:
     raise SystemExit(0)
 
 
+# Global variable to store the current username
+user_id = 0
+username = ""
+
+
 class MenuEngine:
     def __init__(self) -> None:
         self.__user_uow = SqlAlchemyUnitOfWork(
@@ -74,6 +79,7 @@ class MenuEngine:
         # fmt: on
 
     async def register_user(self) -> int:
+        global username, user_id
         print("\nRegistering a new user...")
         username = input("Enter username: ")
         password = input("Enter password: ")
@@ -96,7 +102,7 @@ class MenuEngine:
         return user_id
 
     async def login_user(self) -> int:
-
+        global username, user_id
         print("\nLogging in...")
         username = input("Enter username: ")
         password = input("Enter password: ")
@@ -120,7 +126,7 @@ class MenuEngine:
             options = self.__admin_options if user.is_admin else self.__user_options
 
             while True:
-                sleep(1)
+                sleep(0.5)
                 await clear_screen()
                 print("\nMenu:")
                 for key, (description, _) in options.items():
@@ -130,20 +136,22 @@ class MenuEngine:
                 if action:
                     _, func = action
                     await func()
+                    input("\nPress Enter to continue...")
                 else:
                     print("Invalid option. Please try again.")
 
 
 class _MenuRequests:
     def __init__(self) -> None:
+        def _make_uow() -> SqlAlchemyUnitOfWork:
+            return SqlAlchemyUnitOfWork(
+                async_session, lambda s, m: GenericRepository(s, m)
+            )
 
-        self.__general_uow = SqlAlchemyUnitOfWork(
-            async_session, lambda s, m: GenericRepository(s, m)
-        )
-        self.__cert_serv = CertificateService(self.__general_uow)
-        self.__quest_serv = QuestRoomService(self.__general_uow)
+        self.__cert_serv = CertificateService(_make_uow())
+        self.__quest_serv = QuestRoomService(_make_uow())
         self.__booking_serv = BookingService(
-            self.__general_uow, self.__cert_serv, self.__quest_serv
+            _make_uow(), self.__cert_serv, self.__quest_serv
         )
 
     async def see_all_rooms(self) -> None:
@@ -155,7 +163,7 @@ class _MenuRequests:
             for room in rooms:
                 if room is not None:
                     print(
-                        f"ID: {room.id}, Name: {room.name}, Price: {room.price}, Description: {room.description}, Working Hours: {room.working_hours}"
+                        f"ID: {room.id}, Name: {room.name}, Price: {room.price}, Min Participants: {room.min_participants}, Max Participants: {room.max_participants}, Description: {room.description}, Working Hours: {room.working_hours}"
                     )
 
     async def check_available_rooms(self) -> None:
@@ -169,7 +177,7 @@ class _MenuRequests:
         for room in available_rooms:
             if room is not None:
                 print(
-                    f"ID: {room.id}, Name: {room.name}, Price: {room.price}, Description: {room.description}, Working Hours: {room.working_hours}"
+                    f"ID: {room.id}, Name: {room.name}, Price: {room.price}, Min Participants: {room.min_participants}, Max Participants: {room.max_participants}, Description: {room.description}, Working Hours: {room.working_hours}"
                 )
 
     async def get_room_by_id(self) -> None:
@@ -179,27 +187,35 @@ class _MenuRequests:
             print("Room not found.")
         else:
             print(
-                f"ID: {room.id}, Name: {room.name}, Price: {room.price}, Description: {room.description}, Working Hours: {room.working_hours}"
+                f"ID: {room.id}, Name: {room.name}, Price: {room.price}, Min Participants: {room.min_participants}, Max Participants: {room.max_participants}, Description: {room.description}, Working Hours: {room.working_hours}"
             )
 
     async def book_room(self) -> None:
-        user_id = int(input("Enter your user ID: "))
-        customer_name = input("Enter your name: ")
         room_id = int(input("Enter room ID to book: "))
         person_amount = int(input("Enter number of participants: "))
         book_date = input("Enter a booking date (HH-DD-MM): ")
 
-        book_date = datetime.strptime(book_date, "%H-%d-%m")
+        # Parse hour-day-month and set current year to avoid year=1900 issues
+        try:
+            parsed = datetime.strptime(book_date, "%H-%d-%m")
+            parsed = parsed.replace(year=datetime.now().year)
+            book_date = parsed
+        except ValueError:
+            print("Invalid date format. Please use HH-DD-MM.")
+            return await self.book_room()
 
         customer_request = CustomerRequest(
             user_id=user_id,
-            customer_name=customer_name,
+            customer_name=username,
             room_id=room_id,
             person_amount=person_amount,
             book_date=book_date,
         )
 
-        await self.__booking_serv.book_room(customer_request)
+        try:
+            await self.__booking_serv.book_room(customer_request)
+        except ValueError as e:
+            print(f"Booking failed: {e}")
 
     async def add_room(self) -> None:
         name = input("Enter room name: ")
@@ -254,22 +270,22 @@ class _MenuRequests:
             await self.update_room()
 
     async def add_cert(self) -> None:
-        code = input("Enter certificate code: ")
+        name = input("Enter certificate name: ")
         discount_percentage = int(input("Enter discount percentage: "))
         user_id = int(input("Enter user ID for this certificate: "))
         cert = CertificateModel(
-            code=code, discount_percentage=discount_percentage, user_id=user_id
+            name=name, discount_percentage=discount_percentage, user_id=user_id
         )
 
-        await self.__cert_serv.add_cert(cert)
+        await self.__cert_serv.add_cert(cert, user_id)
 
     async def delete_cert(self) -> None:
         cert_id = int(input("Enter certificate ID to delete: "))
-        await self.__cert_serv.delete_cert(cert_id)
+        await self.__cert_serv.delete_cert(cert_id, user_id)
 
     async def update_cert(self) -> None:
         cert_id = int(input("Enter certificate ID to update: "))
-        code = input("Enter new certificate code: ")
+        name = input("Enter new certificate name: ")
         discount_percentage = int(input("Enter new discount percentage: "))
         user_id = int(input("Enter new user ID for this certificate: "))
         is_active_input = input("Is the certificate active? (yes/no): ")
@@ -283,7 +299,7 @@ class _MenuRequests:
 
         updated_cert = CertificateModel(
             id=cert_id,
-            code=code,
+            name=name,
             discount_percentage=discount_percentage,
             user_id=user_id,
             is_active=is_active,
@@ -298,5 +314,5 @@ class _MenuRequests:
         else:
             print("Available certificates:")
             for cert in certs:
-                text = f"ID: {cert.id}, Code: {cert.code}, Discount: {cert.discount_percentage}%"  # pyright: ignore[reportOptionalMemberAccess]
+                text = f"ID: {cert.id}, Name: {cert.name}, Discount: {cert.discount_percentage}%"  # pyright: ignore[reportOptionalMemberAccess]
                 print(text)
