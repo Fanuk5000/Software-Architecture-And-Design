@@ -28,6 +28,23 @@ async def _start_menu():
     await menu_engine.display_menu(user_id)
 
 
+async def _close_connection():
+    from DataAccess.DataBase.initDB import engine
+
+    print("Cleaning up resources...")
+    try:
+        asyncio.run(engine.dispose())
+    except RuntimeError:
+        # event loop is already running; schedule disposal if possible
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(engine.dispose())  # best-effort
+        else:
+            loop.run_until_complete(engine.dispose())
+    except Exception as exc:
+        print("Error disposing engine:", exc)
+
+
 if __name__ == "__main__":
     from UI.menu import ChangeUser
 
@@ -38,3 +55,5 @@ if __name__ == "__main__":
     except ChangeUser:
         print("\nChanging user...")
         asyncio.run(_start_menu())
+    finally:
+        asyncio.run(_close_connection())
