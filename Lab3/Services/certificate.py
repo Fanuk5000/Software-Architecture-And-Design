@@ -12,18 +12,34 @@ class CertificateService:
             certs_repo = uow.get_repository(CertificateModel)
             return await certs_repo.get_all()
 
-    async def add_cert(self, cert: CertificateModel) -> None:
+    async def add_cert(self, cert: CertificateModel, user_id: int) -> None:
         async with self.__uow as uow:
             certs_repo = uow.get_repository(CertificateModel)
+            user_repo = uow.get_repository(UserModel)
+            user = await user_repo.get_by_id(user_id)
+            if user is None:
+                raise ValueError("User not found")
+
+            user.has_certificate = True
+            await user_repo.update(user)
             await certs_repo.add(cert)
             await uow.commit()
 
-    async def delete_cert(self, cert_id: int) -> None:
+    async def delete_cert(self, cert_id: int, user_id: int) -> None:
         async with self.__uow as uow:
             certs_repo = uow.get_repository(CertificateModel)
+            user_repo = uow.get_repository(UserModel)
             cert_to_delete = await certs_repo.get_by_id(cert_id)
+            user = await user_repo.get_by_id(user_id)
             if cert_to_delete is None:
                 raise ValueError("Certificate not found")
+            if user is None:
+                raise ValueError("User not found")
+            if user_id != cert_to_delete.user_id:
+                raise ValueError("Unauthorized to delete this certificate")
+
+            user.has_certificate = False
+            await user_repo.update(user)
             await certs_repo.delete(cert_to_delete)
             await uow.commit()
 
@@ -36,12 +52,12 @@ class CertificateService:
             await certs_repo.update(cert)
             await uow.commit()
 
-    async def use_cert(self, cert_id: int, user_id: int) -> int:
+    async def use_cert(self, user_id: int) -> int:
         async with self.__uow as uow:
             certs_repo = uow.get_repository(CertificateModel)
             users_repo = uow.get_repository(UserModel)
 
-            cert_to_use: CertificateModel | None = await certs_repo.get_by_id(cert_id)
+            cert_to_use: CertificateModel | None = await certs_repo.get_by_id(user_id)
             if cert_to_use is None or user_id != cert_to_use.user_id:
                 raise ValueError("Certificate not found")
 
@@ -55,4 +71,4 @@ class CertificateService:
             cert_to_use.is_active = False
             await certs_repo.update(cert_to_use)
             await uow.commit()
-            return await cert_to_use.discount_percentage
+            return cert_to_use.discount_percentage
