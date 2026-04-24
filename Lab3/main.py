@@ -19,10 +19,10 @@ async def main():
 async def _start_menu():
     have_user = input("Do you have an account? (yes/no): ").strip().lower()
     if have_user == "yes":
-        user_id = await menu_engine.login_user()
+        user_id = await menu_engine.login()
         print("\nLogin successful!")
     else:
-        user_id = await menu_engine.register_user()
+        user_id = await menu_engine.register()
         print("\nRegistration successful!")
 
     await menu_engine.display_menu(user_id)
@@ -33,14 +33,7 @@ async def _close_connection():
 
     print("Cleaning up resources...")
     try:
-        asyncio.run(engine.dispose())
-    except RuntimeError:
-        # event loop is already running; schedule disposal if possible
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(engine.dispose())  # best-effort
-        else:
-            loop.run_until_complete(engine.dispose())
+        await engine.dispose()
     except Exception as exc:
         print("Error disposing engine:", exc)
 
