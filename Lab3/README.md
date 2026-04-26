@@ -27,7 +27,65 @@
 часовий проміжок. При наявності подарункового сертифікату
 замовити квест можна безкоштовно.
 
-## Примітка
+## Структура лабораторної
+
+```
++---DataAccess
+|   |   abstracts.py
+|   |   repository.py
+|   |   transactions_manager.py
+|   |   ___init__.py
+|   +---DataBase
+|   |   |   initDB.py
+|   |   |   models.py
+|   |   |   ___init__.py
++---Services
+|   |   booking.py
+|   |   certificate.py
+|   |   quest.py
+|   |   shared_dataclasses.py
+|   |   user.py
+|   |   ___init__.py
+|\---UI
+|   |   menu.py
+|   |   menu_requests.py
+|   |   ___init__.py
+|   .python-version
+|   db_config.json
+|   main.py
+|   pyproject.toml
+|   quest_rooms.db
+|   README.md
+|   requirements.txt
+|   uv.lock
+```
+
+## Вимоги до середовища розробки
+
+- python 3.14
+- SQLAlchemy 2.0.0 або вище
+- SQLite (використовується як СУБД для зберігання даних)
+- Під лінукс
+
+```bash
+python3.14 -m venv .venv314
+source .venv314/bin/activate
+pip install -r requirements.txt
+```
+
+- Під Windows
+
+```powershell
+py -3.14 -m venv .venv314
+.venv314\Scripts\activate
+pip install -r requirements.txt
+```
+
+- Запускаи як завжди
+
+```bash
+python main.py
+```
 
 У цій лабораторній рабораторії викорситовується python 3.14, тому для запуску проекту необхідно встановити відповідну версію python.
 
