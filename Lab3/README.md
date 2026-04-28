@@ -29,7 +29,7 @@
 
 ## Структура лабораторної
 
-```
+```note
 +---DataAccess
 |   |   abstracts.py
 |   |   repository.py
