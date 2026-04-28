@@ -98,10 +98,24 @@ class QuestRoomRequests:
 
     async def check_available_rooms(self) -> None:
         book_date = input("Enter a booking date (HH-DD-MM): ")
-        book_date = datetime.strptime(book_date, "%H-%d-%m")
-        available_rooms = await self.__quest_serv.check_available_rooms(book_date)
+
+        try:
+            book_date = datetime.strptime(book_date, "%H-%d-%m")
+        except ValueError:
+            print("Invalid date format. Please use HH-DD-MM.")
+            await self.check_available_rooms()
+            return
+
+        try:
+            available_rooms = await self.__quest_serv.check_available_rooms(book_date)
+        except ValueError:
+            print("Date cannot be in the past. Please enter a valid date.")
+            await self.check_available_rooms()
+            return
+
         if not available_rooms:
             print("No rooms available on this date.")
+            return
 
         print("Available rooms:")
         for room in available_rooms:

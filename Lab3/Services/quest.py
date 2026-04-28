@@ -31,7 +31,10 @@ class QuestRoomService:
                 bookings_repo = uow.get_repository(BookingModel)
 
             current_date = datetime.now().date()
-            if date.month < current_date.month or date.day < current_date.day:
+
+            if (date.month < current_date.month) or (
+                date.month == current_date.month and date.day < current_date.day
+            ):
                 raise ValueError("Date cannot be in the past")
 
             all_rooms: list[QuestRoomModel] = await rooms_repo.get_all()
