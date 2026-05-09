@@ -25,6 +25,18 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     has_certificate: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    @validates("username")
+    def validate_username(self, key, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Username cannot be empty")
+        return value
+
+    @validates("money")
+    def validate_money(self, key, value: int) -> int:
+        if value < 0:
+            raise ValueError("Money cannot be negative")
+        return value
+
 
 class QuestRoom(Base):
     __tablename__ = "quest_rooms"
@@ -35,6 +47,19 @@ class QuestRoom(Base):
     min_participants: Mapped[int] = mapped_column(Integer, nullable=False)
     price: Mapped[int] = mapped_column(Integer, nullable=False)
     working_hours: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str] = mapped_column(String, nullable=True)
+
+    @validates("name")
+    def validate_name(self, key, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Name cannot be empty")
+        return value
+
+    @validates("max_participants", "min_participants", "price")
+    def validate_participants(self, key, value: int) -> int:
+        if value <= 0:
+            raise ValueError(f"{key} must be a positive integer")
+        return value
 
     @validates("working_hours")
     def validate_working_hours(self, key, value: str) -> str:
@@ -48,8 +73,6 @@ class QuestRoom(Base):
         if start >= end:
             raise ValueError("Start hour must be less than end hour")
         return value
-
-    description: Mapped[str] = mapped_column(String, nullable=True)
 
 
 class Booking(Base):
