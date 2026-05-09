@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 from DataAccess.DataBase.models import Booking as BookingModel
@@ -6,12 +8,20 @@ from DataAccess.DataBase.models import User as UserModel
 
 #
 from DataAccess.repository import GenericRepository
-from DataAccess.transactions_manager import SqlAlchemyUnitOfWork
+from DataAccess.unit_of_work import SqlAlchemyUnitOfWork
 
 #
 from Services.certificate import CertificateService
 from Services.quest import QuestRoomService
-from Services.shared_dataclasses import CustomerRequest
+
+
+@dataclass
+class CustomerRequest:
+    user_id: int
+    room_id: int
+    customer_name: str
+    person_amount: int
+    book_date: datetime
 
 
 class BookingService:

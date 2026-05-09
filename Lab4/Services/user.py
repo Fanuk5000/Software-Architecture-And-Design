@@ -1,6 +1,6 @@
 from DataAccess.DataBase.models import User as UserModel
 from DataAccess.repository import GenericRepository
-from DataAccess.transactions_manager import SqlAlchemyUnitOfWork
+from DataAccess.unit_of_work import SqlAlchemyUnitOfWork
 
 
 class UserService:

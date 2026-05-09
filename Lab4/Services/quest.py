@@ -3,10 +3,11 @@ from typing import Any
 
 from DataAccess.DataBase.models import Booking as BookingModel
 from DataAccess.DataBase.models import QuestRoom as QuestRoomModel
+from DataAccess.DataBase.schemas import CreateQuestRoom
 
 #
 from DataAccess.repository import GenericRepository
-from DataAccess.transactions_manager import SqlAlchemyUnitOfWork
+from DataAccess.unit_of_work import SqlAlchemyUnitOfWork
 
 
 class QuestRoomService:
@@ -54,15 +55,16 @@ class QuestRoomService:
                     available_rooms.append(room)
             return available_rooms
 
-    async def see_all_rooms(self) -> list[QuestRoomModel] | list[None]:
+    async def see_all_rooms(self) -> list[QuestRoomModel] | list:
         async with self.__uow as uow:
             rooms_repo = uow.get_repository(QuestRoomModel)
             return await rooms_repo.get_all()
 
-    async def add_room(self, room: QuestRoomModel) -> None:
+    async def add_room(self, room: CreateQuestRoom) -> None:
+        orm_room = self.__create_orm_room(room)
         async with self.__uow as uow:
             rooms_repo = uow.get_repository(QuestRoomModel)
-            await rooms_repo.add(room)
+            await rooms_repo.add(orm_room)
             await uow.commit()
 
     async def delete_room(self, room_id: int) -> None:
@@ -74,16 +76,22 @@ class QuestRoomService:
             await rooms_repo.delete(room_to_delete)
             await uow.commit()
 
-    async def update_room(self, room: QuestRoomModel) -> None:
+    async def update_room(self, room_id: int, room: CreateQuestRoom) -> None:
+        orm_room = self.__create_orm_room(room)
         async with self.__uow as uow:
             rooms_repo = uow.get_repository(QuestRoomModel)
-            room_to_update = await rooms_repo.get_by_id(room.id)
+            room_to_update = await rooms_repo.get_by_id(room_id)
+
             if room_to_update is None:
                 raise ValueError("Room not found")
-            await rooms_repo.update(room)
+            await rooms_repo.update(orm_room)
             await uow.commit()
 
     async def get_room_by_id(self, room_id: int) -> QuestRoomModel | None:
         async with self.__uow as uow:
             rooms_repo = uow.get_repository(QuestRoomModel)
             return await rooms_repo.get_by_id(room_id)
+
+    def __create_orm_room(self, room: CreateQuestRoom) -> QuestRoomModel:
+        orm_room = QuestRoomModel(**room.model_dump())
+        return orm_room

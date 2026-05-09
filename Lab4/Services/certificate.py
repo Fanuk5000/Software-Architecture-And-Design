@@ -1,6 +1,6 @@
 from DataAccess.DataBase.models import Certificate as CertificateModel
 from DataAccess.DataBase.models import User as UserModel
-from DataAccess.transactions_manager import SqlAlchemyUnitOfWork
+from DataAccess.unit_of_work import SqlAlchemyUnitOfWork
 
 
 class CertificateService:
