@@ -58,6 +58,9 @@ class BookingService:
                 customer_request, available_rooms, rooms_repo, user
             )
 
+            if user is None:
+                raise ValueError("User not found")
+
             # If verification passed, proceed with booking
             chosen_room: QuestRoomModel | None = await rooms_repo.get_by_id(
                 customer_request.room_id
@@ -89,7 +92,7 @@ class BookingService:
     async def __verify_booking(
         self,
         customer_request: CustomerRequest,
-        available_rooms: list[QuestRoomModel] | list[None],
+        available_rooms: list[QuestRoomModel] | list,
         rooms_repo: GenericRepository[QuestRoomModel],
         user: UserModel | None,
     ) -> bool:
@@ -132,3 +135,23 @@ class BookingService:
         discounted_price = room_price * (1 - discount_percentage / 100)
 
         return int(discounted_price)
+
+    async def get_bookings_by_username(
+        self, username: str
+    ) -> list[BookingModel] | list:
+        async with self.__uow as uow:
+            bookings_repo = uow.get_repository(BookingModel)
+            user_repo = uow.get_repository(UserModel)
+
+            user: UserModel | None = await user_repo.get_one_by(username=username)
+            if user is None:
+                raise ValueError("User not found")
+            all_bookings: list[BookingModel] = await bookings_repo.get_all_by(
+                customer_name=username
+            )
+            return all_bookings
+
+    async def get_all_bookings(self) -> list[BookingModel] | list:
+        async with self.__uow as uow:
+            bookings_repo = uow.get_repository(BookingModel)
+            return await bookings_repo.get_all()
