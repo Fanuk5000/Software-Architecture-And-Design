@@ -1,5 +1,6 @@
 from DataAccess.DataBase.models import Certificate as CertificateModel
 from DataAccess.DataBase.models import User as UserModel
+from DataAccess.DataBase.schemas import CreateCertificate
 from DataAccess.unit_of_work import SqlAlchemyUnitOfWork
 
 
@@ -7,12 +8,17 @@ class CertificateService:
     def __init__(self, uow_factory: SqlAlchemyUnitOfWork) -> None:
         self.__uow = uow_factory
 
-    async def get_available_certs(self) -> list[CertificateModel] | list[None]:
+    async def get_all_certs(self) -> list[CertificateModel] | list[None]:
         async with self.__uow as uow:
             certs_repo = uow.get_repository(CertificateModel)
             return await certs_repo.get_all()
 
-    async def add_cert(self, cert: CertificateModel, user_id: int) -> None:
+    async def get_user_certs(self, user_id: int) -> list[CertificateModel] | list:
+        async with self.__uow as uow:
+            certs_repo = uow.get_repository(CertificateModel)
+            return await certs_repo.get_all_by(user_id=user_id)
+
+    async def add_cert(self, cert: CreateCertificate, user_id: int) -> None:
         async with self.__uow as uow:
             certs_repo = uow.get_repository(CertificateModel)
             user_repo = uow.get_repository(UserModel)
@@ -22,7 +28,8 @@ class CertificateService:
 
             user.has_certificate = True
             await user_repo.update(user)
-            await certs_repo.add(cert)
+            orm_cert = self.__create_orm_cert(cert)
+            await certs_repo.add(orm_cert)
             await uow.commit()
 
     async def delete_cert(self, cert_id: int, user_id: int) -> None:
@@ -43,13 +50,15 @@ class CertificateService:
             await certs_repo.delete(cert_to_delete)
             await uow.commit()
 
-    async def update_cert(self, cert: CertificateModel) -> None:
+    async def update_cert(self, cert: CreateCertificate) -> None:
+        orm_cert = self.__create_orm_cert(cert)
+
         async with self.__uow as uow:
             certs_repo = uow.get_repository(CertificateModel)
-            cert_to_update = await certs_repo.get_by_id(cert.id)
+            cert_to_update = await certs_repo.get_by_id(orm_cert.id)
             if cert_to_update is None:
                 raise ValueError("Certificate not found")
-            await certs_repo.update(cert)
+            await certs_repo.update(orm_cert)
             await uow.commit()
 
     async def use_cert(self, user_id: int) -> int:
@@ -72,3 +81,7 @@ class CertificateService:
             await certs_repo.update(cert_to_use)
             await uow.commit()
             return cert_to_use.discount_percentage
+
+    def __create_orm_cert(self, cert: CreateCertificate) -> CertificateModel:
+        orm_cert = CertificateModel(**cert.model_dump())
+        return orm_cert
