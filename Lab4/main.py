@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from API import quests
+from API import quests, users
 from DataAccess.DataBase.initDB import engine, init_db
 from fastapi import FastAPI
 
@@ -25,4 +25,12 @@ async def root():
     return {"message": "Hello this is a quest room API!"}
 
 
-app.router.include_router(quests.router)
+routers = (
+    quests.admin_router,
+    quests.public_router,
+    users.admin_router,
+    users.public_router,
+)
+
+for router in routers:
+    app.router.include_router(router)

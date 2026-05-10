@@ -6,16 +6,19 @@ from fastapi import APIRouter, Depends, HTTPException
 from Services.quest import QuestRoomService
 from sqlalchemy.exc import SQLAlchemyError
 
-from API.general import get_quest_service
+from API.dependencies import get_current_admin_user, get_quest_service
 
 if TYPE_CHECKING:
     pass
 
 
-router = APIRouter(prefix="/quests", tags=["quests"])
+admin_router = APIRouter(
+    prefix="/quests", tags=["quests"], dependencies=[Depends(get_current_admin_user)]
+)
+public_router = APIRouter(prefix="/quests", tags=["quests"])
 
 
-@router.get("/", response_model=list[schemas.ReadQuestRoom])
+@admin_router.get("/", response_model=list[schemas.ReadQuestRoom])
 async def get_quests(
     service: QuestRoomService = Depends(get_quest_service),
 ) -> list[schemas.ReadQuestRoom]:
@@ -30,7 +33,7 @@ async def get_quests(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@router.get("/available/{date}", response_model=list[schemas.ReadQuestRoom])
+@public_router.get("/available/{date}", response_model=list[schemas.ReadQuestRoom])
 async def get_available_quests(
     date: str, service: QuestRoomService = Depends(get_quest_service)
 ):
@@ -53,7 +56,7 @@ async def get_available_quests(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@router.get("/{id}", response_model=schemas.ReadQuestRoom)
+@public_router.get("/{id}", response_model=schemas.ReadQuestRoom)
 async def get_quest_by_id(
     id: int, service: QuestRoomService = Depends(get_quest_service)
 ) -> schemas.ReadQuestRoom:
@@ -66,7 +69,7 @@ async def get_quest_by_id(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@router.post("/", status_code=201)
+@admin_router.post("/", status_code=201)
 async def create_quest(
     room: schemas.CreateQuestRoom,
     service: QuestRoomService = Depends(get_quest_service),
@@ -80,7 +83,7 @@ async def create_quest(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@router.put("/{id}")
+@admin_router.put("/{id}")
 async def update_quest(
     id: int,
     room: schemas.CreateQuestRoom,
@@ -95,7 +98,7 @@ async def update_quest(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@router.delete("/{id}")
+@admin_router.delete("/{id}")
 async def delete_quest(
     id: int, service: QuestRoomService = Depends(get_quest_service)
 ) -> dict[str, str]:
