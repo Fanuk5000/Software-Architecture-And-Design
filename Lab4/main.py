@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from API import bookigs, quests, users
+from API import bookigs, certs, quests, users
 from DataAccess.DataBase.initDB import engine, init_db
 from fastapi import FastAPI
 
@@ -32,6 +32,8 @@ routers = (
     users.public_router,
     bookigs.admin_router,
     bookigs.public_router,
+    certs.admin_router,
+    certs.public_router,
 )
 
 for router in routers:
