@@ -54,3 +54,26 @@ async def book_room(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
     return {"message": "Room booked successfully"}
+
+
+@public_router.get("/my")
+async def get_my_bookings(
+    current_user: UserModel = Depends(get_current_user),
+    service: BookingService = Depends(get_booking_service),
+):
+    try:
+        bookings = await service.get_bookings_by_username(current_user.username)
+        return bookings
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+
+
+@admin_router.get("/all")
+async def get_all_bookings(
+    service: BookingService = Depends(get_booking_service),
+):
+    try:
+        bookings = await service.get_all_bookings()
+        return bookings
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
