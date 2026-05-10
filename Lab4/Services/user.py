@@ -1,6 +1,27 @@
+import hashlib
+from dataclasses import dataclass
+
 from DataAccess.DataBase.models import User as UserModel
 from DataAccess.repository import GenericRepository
 from DataAccess.unit_of_work import SqlAlchemyUnitOfWork
+
+
+@dataclass
+class UpdateUserRequest:
+    username: str | None
+    password: str | None
+    money: float | None
+    is_admin: bool | None
+    is_active: bool | None
+    has_certificate: bool | None
+
+
+def _get_password_hash(password: str) -> str:
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+
+def _verify_password(plain_password: str, hashed_password: str) -> bool:
+    return _get_password_hash(plain_password) == hashed_password
 
 
 class UserService:
@@ -18,7 +39,7 @@ class UserService:
 
             new_user = UserModel(
                 username=username,
-                password=password,
+                password=_get_password_hash(password),
                 money=money,
                 is_admin=is_admin,
                 is_active=True,
@@ -32,7 +53,7 @@ class UserService:
         async with self.__uow as uow:
             user_repo: GenericRepository = uow.get_repository(UserModel)  # pyright: ignore[reportAssignmentType]
             user: UserModel | None = await user_repo.get_one_by(username=username)
-            if user is None or user.password != password:
+            if user is None or not _verify_password(password, user.password):
                 raise ValueError("Invalid username or password")
             if not user.is_active:
                 raise ValueError("User account is inactive")
@@ -48,21 +69,40 @@ class UserService:
             await uow.commit()
 
     async def update_user(
-        self, user_id: int, username: str | None = None, password: str | None = None
+        self,
+        user_id: int,
+        update_data: UpdateUserRequest,
     ) -> None:
         async with self.__uow as uow:
             user_repo: GenericRepository = uow.get_repository(UserModel)  # pyright: ignore[reportAssignmentType]
             user_to_update: UserModel | None = await user_repo.get_by_id(user_id)
             if user_to_update is None:
                 raise ValueError("User not found")
-            if username is not None:
-                setattr(user_to_update, "username", username)
-            if password is not None:
-                setattr(user_to_update, "password", password)
+
+            attrs = (
+                "username",
+                "password",
+                "money",
+                "is_admin",
+                "is_active",
+                "has_certificate",
+            )
+
+            for attr in attrs:
+                if getattr(update_data, attr) is not None:
+                    if attr == "password":
+                        setattr(
+                            user_to_update,
+                            attr,
+                            _get_password_hash(getattr(update_data, attr)),
+                        )
+                    else:
+                        setattr(user_to_update, attr, getattr(update_data, attr))
+
             await user_repo.update(user_to_update)
             await uow.commit()
 
-    async def get_user(self, user_id: int) -> UserModel | None:
+    async def get_user_by_id(self, user_id: int) -> UserModel | None:
         async with self.__uow as uow:
             user_repo: GenericRepository = uow.get_repository(UserModel)  # pyright: ignore[reportAssignmentType]
             return await user_repo.get_by_id(user_id)
