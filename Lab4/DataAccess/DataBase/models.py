@@ -55,8 +55,24 @@ class QuestRoom(Base):
             raise ValueError("Name cannot be empty")
         return value
 
-    @validates("max_participants", "min_participants", "price")
+    @validates("max_participants", "min_participants")
     def validate_participants(self, key, value: int) -> int:
+        if value <= 0:
+            raise ValueError(f"{key} must be a positive integer")
+        if key == "max_participants" and hasattr(self, "min_participants"):
+            if value < self.min_participants:
+                raise ValueError(
+                    "max_participants must be greater than or equal to min_participants"
+                )
+        if key == "min_participants" and hasattr(self, "max_participants"):
+            if value > self.max_participants:
+                raise ValueError(
+                    "min_participants must be less than or equal to max_participants"
+                )
+        return value
+
+    @validates("price")
+    def validate_price(self, key, value: int) -> int:
         if value <= 0:
             raise ValueError(f"{key} must be a positive integer")
         return value
