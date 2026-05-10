@@ -28,7 +28,7 @@ async def register_user(
         )
         return {"message": f"User with ID {user_id} created successfully"}
     except ValueError as ve:
-        raise HTTPException(status_code=400, detail=ve)
+        raise HTTPException(status_code=400, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -72,7 +72,7 @@ async def delete_user(
         await service.delete_user(user_id)
         return {"message": f"User with ID {user_id} deleted successfully"}
     except ValueError as ve:
-        raise HTTPException(status_code=404, detail=ve)
+        raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -87,7 +87,7 @@ async def update_user(
         await service.update_user(user_id, update_data)
         return {"message": f"User with ID {user_id} updated successfully"}
     except ValueError as ve:
-        raise HTTPException(status_code=404, detail=ve)
+        raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -141,7 +141,7 @@ async def change_user_money(
         await service.change_money(user_id, amount)
         return {"message": f"User with ID {user_id} money changed by {amount}"}
     except ValueError as ve:
-        raise HTTPException(status_code=404, detail=ve)
+        raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -157,7 +157,7 @@ async def change_user_certificate_status(
         status_str = "granted" if has_certificate else "revoked"
         return {"message": f"User with ID {user_id} certificate {status_str}"}
     except ValueError as ve:
-        raise HTTPException(status_code=404, detail=ve)
+        raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -173,7 +173,7 @@ async def change_user_active_status(
         status_str = "activated" if is_active else "deactivated"
         return {"message": f"User with ID {user_id} {status_str}"}
     except ValueError as ve:
-        raise HTTPException(status_code=404, detail=ve)
+        raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -189,7 +189,7 @@ async def change_user_admin_status(
         status_str = "granted" if is_admin else "revoked"
         return {"message": f"User with ID {user_id} admin rights {status_str}"}
     except ValueError as ve:
-        raise HTTPException(status_code=404, detail=ve)
+        raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -202,6 +202,6 @@ async def delete_user_if_inactive(
         await service.del_if_inactive(user_id)
         return {"message": f"User with ID {user_id} deleted if inactive"}
     except ValueError as ve:
-        raise HTTPException(status_code=404, detail=ve)
+        raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")

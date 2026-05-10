@@ -51,7 +51,7 @@ async def get_available_quests(
             return []
         return available_rooms  # type: ignore[return-value]
     except ValueError as ve:
-        raise HTTPException(status_code=400, detail=ve)
+        raise HTTPException(status_code=400, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -78,7 +78,7 @@ async def create_quest(
         await service.add_room(room)
         return {"message": "Quest room created successfully"}
     except ValueError as ve:
-        raise HTTPException(status_code=400, detail=ve)
+        raise HTTPException(status_code=400, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -93,7 +93,7 @@ async def update_quest(
         await service.update_room(id, room)
         return {"message": "Quest room updated successfully"}
     except ValueError as ve:
-        raise HTTPException(status_code=404, detail=ve)
+        raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
@@ -106,6 +106,6 @@ async def delete_quest(
         await service.delete_room(id)
         return {"message": "Quest room deleted successfully"}
     except ValueError as ve:
-        raise HTTPException(status_code=404, detail=ve)
+        raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
