@@ -1,13 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
-    username: str
-    password: str
-    money: float
-    has_certificate: bool
-    is_active: bool
-    is_admin: bool
+    username: str = Field(..., description="Unique username of the user")
+    password: str = Field(..., description="User's password (should be stored hashed)")
+    money: float = Field(..., description="Account balance in the user's currency")
+    has_certificate: bool = Field(
+        ..., description="Whether the user has a discount certificate"
+    )
+    is_active: bool = Field(..., description="Whether the user account is active")
+    is_admin: bool = Field(..., description="Whether the user has admin privileges")
 
 
 class CreateUser(UserBase):
@@ -22,12 +24,16 @@ class ReadUser(UserBase):
 
 
 class QuestRoomBase(BaseModel):
-    name: str
-    price: float
-    min_participants: int
-    max_participants: int
-    working_hours: str
-    description: str | None = None
+    name: str = Field(..., description="Name of the quest room")
+    price: float = Field(..., description="Price for booking the quest room")
+    min_participants: int = Field(..., description="Minimum number of participants")
+    max_participants: int = Field(..., description="Maximum number of participants")
+    working_hours: str = Field(
+        ..., description="Working hours or schedule for the room"
+    )
+    description: str | None = Field(
+        None, description="Optional description of the quest room"
+    )
 
 
 class CreateQuestRoom(QuestRoomBase):
@@ -43,11 +49,13 @@ class BookingBase(BaseModel):
     quest_room_id: int
     customer_name: str
     participants_amount: int
-    booking_date: str
+    booking_date: str = Field(..., description="Booking date/time in format (HH-DD-MM)")
 
 
-class CreateBooking(BookingBase):
-    pass
+class CreateBooking(BaseModel):
+    quest_room_id: int
+    participants_amount: int
+    booking_date: str = Field(..., description="Booking date/time in format (HH-DD-MM)")
 
 
 class ReadBooking(BookingBase):
@@ -56,10 +64,12 @@ class ReadBooking(BookingBase):
 
 
 class Certificate(BaseModel):
-    username: str
-    user_id: int
-    discount_percentage: int
-    is_active: bool
+    username: str = Field(..., description="Username the certificate is issued to")
+    user_id: int = Field(..., description="ID of the user who owns the certificate")
+    discount_percentage: int = Field(
+        ..., description="Discount percentage provided by the certificate"
+    )
+    is_active: bool = Field(..., description="Whether the certificate is active")
 
 
 class CreateCertificate(Certificate):

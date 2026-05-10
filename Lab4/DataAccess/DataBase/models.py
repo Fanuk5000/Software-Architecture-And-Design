@@ -2,7 +2,6 @@ import re
 
 from sqlalchemy import (
     Boolean,
-    Date,
     ForeignKey,
     Integer,
     String,
@@ -100,7 +99,7 @@ class Booking(Base):
     )
     customer_name: Mapped[str] = mapped_column(String, nullable=False)
     participants_amount: Mapped[int] = mapped_column(Integer, nullable=False)
-    booking_date: Mapped[Date] = mapped_column(Date, nullable=False)
+    booking_date: Mapped[String] = mapped_column(String, nullable=False)
 
 
 class Certificate(Base):
