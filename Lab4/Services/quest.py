@@ -64,6 +64,10 @@ class QuestRoomService:
         orm_room = self.__create_orm_room(room)
         async with self.__uow as uow:
             rooms_repo = uow.get_repository(QuestRoomModel)
+
+            if rooms_repo.get_one_by(name=orm_room.name) is not None:
+                raise ValueError("Room with this name already exists")
+
             await rooms_repo.add(orm_room)
             await uow.commit()
 
