@@ -83,7 +83,7 @@ class BookingService:
                 quest_room_id=customer_request.room_id,
                 customer_name=customer_request.customer_name,
                 participants_amount=customer_request.person_amount,
-                booking_date=customer_request.book_date,
+                booking_date=f"{customer_request.book_date.hour}-{customer_request.book_date.day}-{customer_request.book_date.month}",
             )
 
             await bookings_repo.add(new_booking)
