@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+from admin import create_admin
 from API import bookigs, certs, quests, users
 from DataAccess.DataBase.initDB import engine, init_db
 from fastapi import FastAPI
@@ -9,6 +10,8 @@ from fastapi import FastAPI
 async def lifespan(app: FastAPI):
     print("Initializing database...")
     await init_db()
+    await create_admin()
+
     yield
     await engine.dispose()
 
