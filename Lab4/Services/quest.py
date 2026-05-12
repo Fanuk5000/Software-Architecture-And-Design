@@ -65,7 +65,7 @@ class QuestRoomService:
         async with self.__uow as uow:
             rooms_repo = uow.get_repository(QuestRoomModel)
 
-            if rooms_repo.get_one_by(name=orm_room.name) is not None:
+            if await rooms_repo.get_one_by(name=orm_room.name) is not None:
                 raise ValueError("Room with this name already exists")
 
             await rooms_repo.add(orm_room)
@@ -81,14 +81,14 @@ class QuestRoomService:
             await uow.commit()
 
     async def update_room(self, room_id: int, room: CreateQuestRoom) -> None:
-        orm_room = self.__create_orm_room(room)
         async with self.__uow as uow:
             rooms_repo = uow.get_repository(QuestRoomModel)
             room_to_update = await rooms_repo.get_by_id(room_id)
-
             if room_to_update is None:
                 raise ValueError("Room not found")
-            await rooms_repo.update(orm_room)
+            for key, val in room.model_dump().items():
+                setattr(room_to_update, key, val)
+            await rooms_repo.update(room_to_update)
             await uow.commit()
 
     async def get_room_by_id(self, room_id: int) -> QuestRoomModel | None:
