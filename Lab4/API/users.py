@@ -1,5 +1,6 @@
 from typing import Annotated, Any
 
+from DataAccess.DataBase.schemas import CreateUser
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from Services.user import UpdateUserRequest, UserService
@@ -23,8 +24,28 @@ async def register_user(
     username: str, password: str, service: UserService = Depends(get_user_service)
 ) -> None:
     try:
-        user_id = await service.create_user(
+        await service.create_user(
             username=username, password=password, money=0.0, is_admin=False
+        )
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+
+
+@admin_router.post(
+    "/create",
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_user(
+    create_user_request: CreateUser, service: UserService = Depends(get_user_service)
+) -> None:
+    try:
+        await service.create_user(
+            username=create_user_request.username,
+            password=create_user_request.password,
+            money=create_user_request.money,
+            is_admin=create_user_request.is_admin,
         )
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
@@ -36,11 +57,12 @@ async def register_user(
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     service: UserService = Depends(get_user_service),
-) -> None:
+) -> dict[str, str]:
     try:
         user_id = await service.verify_user(form_data.username, form_data.password)
 
-        access_token = create_access_token(data={"sub": str(user_id)})  # noqa: F841
+        access_token = create_access_token(data={"sub": str(user_id)})
+        return {"access_token": access_token, "token_type": "bearer"}
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
