@@ -18,7 +18,7 @@ admin_router = APIRouter(
 public_router = APIRouter(prefix="/quests", tags=["quests"])
 
 
-@admin_router.get("/", response_model=list[schemas.ReadQuestRoom])
+@public_router.get("/all", response_model=list[schemas.ReadQuestRoom])
 async def get_quests(
     service: QuestRoomService = Depends(get_quest_service),
 ) -> list[schemas.ReadQuestRoom]:
