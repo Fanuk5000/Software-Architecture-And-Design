@@ -48,8 +48,13 @@ class QuestRoomService:
                 ):
                     continue
 
+                target_date = f"{date.hour}-{date.day}-{date.month}"
+
                 if all(
-                    room.id != booking.quest_room_id and booking.booking_date != date
+                    not (
+                        room.id == booking.quest_room_id
+                        and booking.booking_date == target_date
+                    )
                     for booking in all_bookings
                 ):
                     available_rooms.append(room)
