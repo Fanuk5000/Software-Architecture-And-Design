@@ -29,14 +29,14 @@ async def root():
 
 
 routers = (
-    quests.admin_router,
     quests.public_router,
-    users.admin_router,
+    quests.admin_router,
     users.public_router,
-    bookigs.admin_router,
+    users.admin_router,
     bookigs.public_router,
-    certs.admin_router,
+    bookigs.admin_router,
     certs.public_router,
+    certs.admin_router,
 )
 
 for router in routers:
