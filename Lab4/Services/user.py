@@ -28,7 +28,7 @@ class UserService:
     def __init__(self, uow: SqlAlchemyUnitOfWork):
         self.__uow = uow
 
-    async def register_user(
+    async def create_user(
         self, username: str, password: str, money: float, is_admin: bool
     ) -> int:
         async with self.__uow as uow:
@@ -49,7 +49,7 @@ class UserService:
             await uow.commit()
             return new_user.id
 
-    async def login_user(self, username: str, password: str) -> int:
+    async def verify_user(self, username: str, password: str) -> int:
         async with self.__uow as uow:
             user_repo: GenericRepository = uow.get_repository(UserModel)  # pyright: ignore[reportAssignmentType]
             user: UserModel | None = await user_repo.get_one_by(username=username)

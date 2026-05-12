@@ -18,31 +18,29 @@ admin_router = APIRouter(
 public_router = APIRouter(prefix="/users", tags=["users"])
 
 
-@public_router.post("/register")
+@public_router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(
     username: str, password: str, service: UserService = Depends(get_user_service)
-) -> dict[str, str]:
+) -> None:
     try:
-        user_id = await service.register_user(
+        user_id = await service.create_user(
             username=username, password=password, money=0.0, is_admin=False
         )
-        return {"message": f"User with ID {user_id} created successfully"}
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@public_router.post("/login")
+@public_router.post("/login", status_code=status.HTTP_201_CREATED)
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     service: UserService = Depends(get_user_service),
-):
+) -> None:
     try:
-        user_id = await service.login_user(form_data.username, form_data.password)
+        user_id = await service.verify_user(form_data.username, form_data.password)
 
-        access_token = create_access_token(data={"sub": str(user_id)})
-        return {"access_token": access_token, "token_type": "bearer"}
+        access_token = create_access_token(data={"sub": str(user_id)})  # noqa: F841
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,7 +51,7 @@ async def login(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@public_router.get("/me")
+@public_router.get("/me", status_code=status.HTTP_201_CREATED)
 async def read_users_me(current_user=Depends(get_current_user)) -> dict[str, Any]:
     return {
         "id": current_user.id,
@@ -64,35 +62,33 @@ async def read_users_me(current_user=Depends(get_current_user)) -> dict[str, Any
     }
 
 
-@admin_router.delete("/{user_id}")
+@admin_router.delete("/{user_id}", status_code=status.HTTP_201_CREATED)
 async def delete_user(
     user_id: int, service: UserService = Depends(get_user_service)
-) -> dict[str, str]:
+) -> None:
     try:
         await service.delete_user(user_id)
-        return {"message": f"User with ID {user_id} deleted successfully"}
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@admin_router.put("/{user_id}")
+@admin_router.put("/{user_id}", status_code=status.HTTP_201_CREATED)
 async def update_user(
     user_id: int,
     update_data: UpdateUserRequest,
     service: UserService = Depends(get_user_service),
-) -> dict[str, str]:
+) -> None:
     try:
         await service.update_user(user_id, update_data)
-        return {"message": f"User with ID {user_id} updated successfully"}
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@admin_router.get("/{user_id}")
+@admin_router.get("/{user_id}", status_code=status.HTTP_201_CREATED)
 async def get_user_by_id(
     user_id: int, service: UserService = Depends(get_user_service)
 ) -> dict[str, Any]:
@@ -131,76 +127,72 @@ async def get_all_users(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@admin_router.post("/{user_id}/change_money")
+@admin_router.post("/{user_id}/change_money", status_code=status.HTTP_201_CREATED)
 async def change_user_money(
     user_id: int,
     amount: float,
     service: UserService = Depends(get_user_service),
-) -> dict[str, str]:
+) -> None:
     try:
         await service.change_money(user_id, amount)
-        return {"message": f"User with ID {user_id} money changed by {amount}"}
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@admin_router.post("/{user_id}/change_certificate")
+@admin_router.post("/{user_id}/change_certificate", status_code=status.HTTP_201_CREATED)
 async def change_user_certificate_status(
     user_id: int,
     has_certificate: bool,
     service: UserService = Depends(get_user_service),
-) -> dict[str, str]:
+) -> None:
     try:
         await service.change_certificate_status(user_id, has_certificate)
-        status_str = "granted" if has_certificate else "revoked"
-        return {"message": f"User with ID {user_id} certificate {status_str}"}
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@admin_router.post("/{user_id}/change_active_status")
+@admin_router.post(
+    "/{user_id}/change_active_status", status_code=status.HTTP_201_CREATED
+)
 async def change_user_active_status(
     user_id: int,
     is_active: bool,
     service: UserService = Depends(get_user_service),
-) -> dict[str, str]:
+) -> None:
     try:
         await service.change_active_status(user_id, is_active)
-        status_str = "activated" if is_active else "deactivated"
-        return {"message": f"User with ID {user_id} {status_str}"}
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@admin_router.post("/{user_id}/change_admin_status")
+@admin_router.post(
+    "/{user_id}/change_admin_status", status_code=status.HTTP_201_CREATED
+)
 async def change_user_admin_status(
     user_id: int,
     is_admin: bool,
     service: UserService = Depends(get_user_service),
-) -> dict[str, str]:
+) -> None:
     try:
         await service.change_admin_status(user_id, is_admin)
-        status_str = "granted" if is_admin else "revoked"
-        return {"message": f"User with ID {user_id} admin rights {status_str}"}
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@admin_router.post("/{user_id}/delete_if_inactive")
+@admin_router.post("/{user_id}/delete_if_inactive", status_code=status.HTTP_201_CREATED)
 async def delete_user_if_inactive(
     user_id: int, service: UserService = Depends(get_user_service)
-) -> dict[str, str]:
+) -> None:
     try:
         await service.del_if_inactive(user_id)
-        return {"message": f"User with ID {user_id} deleted if inactive"}
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
     except SQLAlchemyError as e:

@@ -28,7 +28,7 @@ async def book_room(
     booking_request: schemas.CreateBooking,
     current_user: UserModel = Depends(get_current_user),
     service: BookingService = Depends(get_booking_service),
-) -> dict[str, str]:
+) -> None:
     date = booking_request.booking_date
 
     try:
@@ -52,8 +52,6 @@ async def book_room(
         raise HTTPException(status_code=400, detail=str(ve))
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
-
-    return {"message": "Room booked successfully"}
 
 
 @public_router.get("/my")

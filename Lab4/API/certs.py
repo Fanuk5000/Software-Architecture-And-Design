@@ -1,6 +1,6 @@
 from DataAccess.DataBase.models import User as UserModel
 from DataAccess.DataBase.schemas import CreateCertificate
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from Services.certificate import CertificateService
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -41,7 +41,7 @@ async def get_all_certificates(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@admin_router.post("/add")
+@admin_router.post("/add", status_code=status.HTTP_201_CREATED)
 async def add_certificate(
     cert: CreateCertificate,
     service: CertificateService = Depends(get_certificate_service),
@@ -55,7 +55,7 @@ async def add_certificate(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@admin_router.delete("/delete/{cert_id}")
+@admin_router.delete("/delete/{cert_id}", status_code=status.HTTP_201_CREATED)
 async def delete_certificate(
     cert_id: int,
     user_id: int,
@@ -70,7 +70,7 @@ async def delete_certificate(
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 
-@admin_router.put("/update")
+@admin_router.put("/update", status_code=status.HTTP_201_CREATED)
 async def update_certificate(
     cert: CreateCertificate,
     service: CertificateService = Depends(get_certificate_service),

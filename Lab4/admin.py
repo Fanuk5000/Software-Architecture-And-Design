@@ -22,7 +22,7 @@ async def create_admin():
     service = UserService(uow)
     try:
         # Пробуємо створити. Якщо юзер вже є - сервіс кине ValueError, і ми просто підемо далі
-        await service.register_user(
+        await service.create_user(
             username=admin_username, password=admin_password, money=0.0, is_admin=True
         )
         print("Admin user created successfully.", flush=True)
