@@ -129,6 +129,13 @@ class Certificate(BaseModel):
     )
     is_active: bool = Field(..., description="Whether the certificate is active")
 
+    @field_validator("discount_percentage")
+    @classmethod
+    def validate_discount_percentage(cls, value: int) -> int:
+        if not (0 < value <= 100):
+            raise ValueError("discount_percentage must be between 0 and 100")
+        return value
+
 
 class CreateCertificate(Certificate):
     is_active: bool = True
