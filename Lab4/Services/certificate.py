@@ -66,16 +66,18 @@ class CertificateService:
             certs_repo = uow.get_repository(CertificateModel)
             users_repo = uow.get_repository(UserModel)
 
-            cert_to_use: CertificateModel | None = await certs_repo.get_by_id(user_id)
+            cert_to_use: CertificateModel | None = await certs_repo.get_one_by(
+                user_id=user_id, is_active=True
+            )
             if cert_to_use is None or user_id != cert_to_use.user_id:
-                raise ValueError("Certificate not found")
+                raise ValueError(f"Certificate not found for user {user_id}")
 
             user = await users_repo.get_by_id(user_id)
             if user is None:
-                raise ValueError("User not found")
+                raise ValueError(f"User not found with id {user_id}")
 
             if not cert_to_use.is_active and user.has_certificate:
-                raise ValueError("Certificate not available")
+                raise ValueError(f"Certificate not available for user {user_id}")
             user.has_certificate = False
             cert_to_use.is_active = False
             await certs_repo.update(cert_to_use)
